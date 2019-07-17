@@ -11,7 +11,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: MyHomePage(),
+      initialRoute: MyHomePage.id,
+      routes: {
+        MyHomePage.id: (context) => MyHomePage(),
+        CreateAccount.id: (context) => CreateAccount(),
+        Login.id: (context) => Login(),
+        Chat.id: (context) => Chat(),
+      },
     );
   }
 }
@@ -45,11 +51,11 @@ class MyHomePage extends StatelessWidget {
           ),
           CustomButton(
             text:"Log In",
-            callback:(){},
+            callback:(){Navigator.of(context).pushNamed(Login.id);},
           ),
           CustomButton(
-            text:"Register",
-            callback:(){},
+            text:"Create an Account",
+            callback:(){Navigator.of(context).pushNamed(CreateAccount.id);},
           ),
         ],
       )
