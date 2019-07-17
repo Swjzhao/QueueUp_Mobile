@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "393837136913",
+    "firebase_url": "https://queueup-51825.firebaseio.com",
+    "project_id": "queueup-51825",
+    "storage_bucket": "queueup-51825.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393837136913:android:a932dc0b3f4ccfd6",
+        "android_client_info": {
+          "package_name": "com.queueupgames.queueup_mobileapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "393837136913-mtmpnhijs5rhm2bldt9hg5vi8c186r5a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJcphvGSqeqc0BT2VXonW5aNFwnpiR5vQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "393837136913-mtmpnhijs5rhm2bldt9hg5vi8c186r5a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
