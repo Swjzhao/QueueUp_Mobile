@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'chat_main.dart';
+import 'chat_conversation_main.dart';
+import 'chat_messages_main.dart';
 import 'util.dart';
 
 class CreateAccount extends StatefulWidget {
@@ -19,7 +20,7 @@ class _CreateAccountState extends State<CreateAccount> {
   Future<void> registerUser() async {
     FirebaseUser user = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Chat()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => Chat_Messages()));
   }
 
   @override
@@ -95,9 +96,13 @@ class _LoginState extends State<Login> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Chat(
-          user: user,
-        ),
+        builder: (context) =>
+            Chat_Messages(
+              user:user,
+            ),
+//            Chat(
+//          user: user,
+//        ),
       ),
     );
   }
@@ -106,7 +111,7 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Tensor Chat"),
+        title: Text("QueueUp"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
