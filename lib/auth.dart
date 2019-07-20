@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'chat_conversation_main.dart';
 import 'chat_messages_main.dart';
 import 'util.dart';
+import 'package:queueup_mobileapp/dashboard.dart';
 
 class CreateAccount extends StatefulWidget {
   static const String id = "CREATEACCOUNT";
@@ -97,12 +98,9 @@ class _LoginState extends State<Login> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            Chat_Messages(
+            Dashboard(
               user:user,
-            ),
-//            Chat(
-//          user: user,
-//        ),
+            )
       ),
     );
   }
