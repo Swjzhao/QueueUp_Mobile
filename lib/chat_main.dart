@@ -12,7 +12,6 @@ class Chat extends StatefulWidget {
   _ChatState createState() => _ChatState();
 }
 
-
 class _ChatState extends State<Chat> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
@@ -34,6 +33,34 @@ class _ChatState extends State<Chat> {
       );
     }
   }
+
+//  Widget _textComposerWidget() {
+//    return new IconTheme(
+//      data: new IconThemeData(color: Colors.blue),
+//      child: new Container(
+//        margin: const EdgeInsets.symmetric(horizontal: 8.0),
+//        child: new Row(
+//          children: <Widget>[
+//            new Flexible(
+//              child: new TextField(
+//                decoration:
+//                new InputDecoration.collapsed(hintText: "Send a message"),
+//                controller: _textController,
+//                onSubmitted: _handleSubmitted,
+//              ),
+//            ),
+//            new Container(
+//              margin: const EdgeInsets.symmetric(horizontal: 4.0),
+//              child: new IconButton(
+//                icon: new Icon(Icons.send),
+//                onPressed: () => _handleSubmitted(_textController.text),
+//              ),
+//            )
+//          ],
+//        ),
+//      ),
+//    );
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,10 +101,10 @@ class _ChatState extends State<Chat> {
 
                   List<Widget> messages = docs
                       .map((doc) => Message(
-                    from: doc.data['from'],
-                    text: doc.data['text'],
-                    me: widget.user.email == doc.data['from'],
-                  ))
+                            from: doc.data['from'],
+                            text: doc.data['text'],
+                            me: widget.user.email == doc.data['from'],
+                          ))
                       .toList();
 
                   return ListView(
@@ -93,18 +120,24 @@ class _ChatState extends State<Chat> {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
-                      onSubmitted: (value) => callback(),
-                      decoration: InputDecoration(
-                        hintText: "Enter a Message...",
-                        border: const OutlineInputBorder(),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+                      child: TextField(
+                        decoration: new InputDecoration.collapsed(
+                            hintText: "Send a message"),
+                        controller: messageController,
+                        onSubmitted: (value) => callback(),
                       ),
-                      controller: messageController,
                     ),
                   ),
-                  SendButton(
-                    text: "Send",
-                    callback: callback,
+                  new Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: new IconButton(
+                      icon: new Icon(Icons.send),
+                      color: Colors.blue,
+                      onPressed: callback,
+                    ),
                   )
                 ],
               ),
@@ -142,27 +175,39 @@ class Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
+      child: new Column(
         crossAxisAlignment:
-        me ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            me ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            from,
-          ),
-          Material(
-            color: me ? Colors.teal : Colors.red,
-            borderRadius: BorderRadius.circular(10.0),
-            elevation: 6.0,
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-              child: Text(
-                text,
-              ),
+          new Container(
+            padding: EdgeInsets.symmetric(vertical: 6.0),
+            child: Row(
+              mainAxisAlignment:
+                  me ? MainAxisAlignment.end : MainAxisAlignment.start,
+              children: <Widget>[
+                Material(
+                  color: me ? Colors.teal : Colors.red,
+                  borderRadius: BorderRadius.circular(10.0),
+                  elevation: 6.0,
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                    child: Text(
+                      text,
+                    ),
+                  ),
+                ),
+                new Container(
+                  margin: const EdgeInsets.only(left: 5.0),
+                  child: new CircleAvatar(
+                    child: new Text(from[0]),
+                  ),
+                ),
+              ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
-
