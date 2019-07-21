@@ -21,9 +21,17 @@ class _CreateAccountState extends State<CreateAccount> {
   Future<void> registerUser() async {
     FirebaseUser user = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
-
-    _firestore.collection("users").document(user.uid).setData({"data":"temp"});
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(user: user,)));
+    Map<String, String> map = new Map<String, String>();
+    _firestore
+        .collection("users")
+        .document(user.uid)
+        .setData({"messages": map});
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Dashboard(
+                  user: user,
+                )));
   }
 
   @override
@@ -39,8 +47,7 @@ class _CreateAccountState extends State<CreateAccount> {
           Expanded(
             child: Hero(
               tag: 'logo',
-              child: Container(
-              ),
+              child: Container(),
             ),
           ),
           SizedBox(
@@ -99,11 +106,9 @@ class _LoginState extends State<Login> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            Dashboard(
-              user:user,
-            )
-      ),
+          builder: (context) => Dashboard(
+                user: user,
+              )),
     );
   }
 
