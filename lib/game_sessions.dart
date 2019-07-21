@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'Auth.dart';
 
 class Game_Sessions extends StatefulWidget {
-  static const String id = "CHAT";
+  static const String id = "GAME_SESSION";
+
+  final FirebaseUser user;
+
+  const Game_Sessions({Key key, this.user}) : super(key: key);
   @override
   _Game_SessionsState createState() => _Game_SessionsState();
 }

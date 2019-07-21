@@ -8,6 +8,7 @@ class Chat extends StatefulWidget {
   final FirebaseUser user;
 
   const Chat({Key key, this.user}) : super(key: key);
+
   @override
   _ChatState createState() => _ChatState();
 }
@@ -46,15 +47,15 @@ class _ChatState extends State<Chat> {
           ),
         ),
         title: Text("QueueUp"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.close),
-            onPressed: () {
-              _auth.signOut();
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-          )
-        ],
+//        actions: <Widget>[
+//          IconButton(
+//            icon: Icon(Icons.close),
+//            onPressed: () {
+//              _auth.signOut();
+//              Navigator.of(context).popUntil((route) => route.isFirst);
+//            },
+//          )
+//        ],
       ),
       body: SafeArea(
         child: Column(

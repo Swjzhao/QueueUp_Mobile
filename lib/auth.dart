@@ -17,11 +17,13 @@ class _CreateAccountState extends State<CreateAccount> {
   String password;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  final Firestore _firestore = Firestore.instance;
   Future<void> registerUser() async {
     FirebaseUser user = await _auth.createUserWithEmailAndPassword(
         email: email, password: password);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Chat_Messages()));
+
+    _firestore.collection("users").document(user.uid).setData({"data":"temp"});
+    Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(user: user,)));
   }
 
   @override

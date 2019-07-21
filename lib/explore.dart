@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'Auth.dart';
 
 class Explore extends StatefulWidget {
-  static const String id = "CHAT";
+  static const String id = "EXPLORE";
+
+  final FirebaseUser user;
+
+  const Explore({Key key, this.user}) : super(key: key);
   @override
   _ExploreState createState() => _ExploreState();
 }
