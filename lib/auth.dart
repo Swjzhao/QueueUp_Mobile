@@ -25,7 +25,7 @@ class _CreateAccountState extends State<CreateAccount> {
     _firestore
         .collection("users")
         .document(user.uid)
-        .setData({"messages": map});
+        .setData({"email":email, "userid":user.uid, "messages": map});
     Navigator.push(
         context,
         MaterialPageRoute(
@@ -108,7 +108,8 @@ class _LoginState extends State<Login> {
       MaterialPageRoute(
           builder: (context) => Dashboard(
                 user: user,
-              )),
+              )
+      ),
     );
   }
 
