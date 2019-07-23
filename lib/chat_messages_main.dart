@@ -119,13 +119,17 @@ class _UserState extends State<User> {
 
   String getChatID(){
     String chatID;
-    if(widget.messages.containsKey(widget.userid)){
-      chatID = widget.messages[widget.userid];
-    }else{
-      callback();
-      chatID = widget.messages[widget.userid];
-    }
 
+    _firestore.collection('users').document(widget.user.uid).get().then((snapp){
+      Map<dynamic, dynamic> messages = snapp.data['messages'];
+      if(messages.containsKey(widget.userid)){
+        chatID = messages[widget.userid];
+      }else{
+        callback();
+        chatID = messages[widget.userid];
+      }
+
+    });
     return chatID;
   }
 
@@ -195,6 +199,7 @@ class _UserState extends State<User> {
                         other: widget.userid,
                       )));
             },
+
           )
         ],
       ),

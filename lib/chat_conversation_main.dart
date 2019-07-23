@@ -23,9 +23,46 @@ class _ChatState extends State<Chat> {
   TextEditingController messageController = TextEditingController();
   ScrollController scrollController = ScrollController();
 
+  String getChatIDD() {
+    _firestore
+        .collection('users')
+        .document(widget.user.uid)
+        .get()
+        .then((snapp) {
+      Map<dynamic, dynamic> messages = snapp.data['messages'];
+      String temp = messages[widget.other];
+      return  temp;
+    });
+  }
+  String chatIDD;
+  void initState(){
+     _firestore
+        .collection('users')
+        .document(widget.user.uid)
+        .get()
+        .then((snapp) {
+      Map<dynamic, dynamic> messages = snapp.data['messages'];
+      chatIDD = messages[widget.other];
+    });
+  }
+
   Future<void> callback() async {
+
+    String chatIDD;
+    await _firestore
+        .collection('users')
+        .document(widget.user.uid)
+        .get()
+        .then((snapp) {
+      Map<dynamic, dynamic> messages = snapp.data['messages'];
+      chatIDD = messages[widget.other];
+    });
     if (messageController.text.length > 0) {
-      await _firestore.collection("chat").document(widget.chatID).collection('messages').add({
+      await _firestore
+          .collection("chat")
+          .document(chatIDD)
+          .collection('messages')
+          .add({
         'text': messageController.text,
         'from': widget.user.email,
       });
@@ -39,15 +76,16 @@ class _ChatState extends State<Chat> {
   }
 
   @override
-  void didUpdateWidget(Widget oldWidget){
+  void didUpdateWidget(Widget oldWidget) {
     onLoad();
   }
+
 //  void initState(){
 //    super.initState();
 //    WidgetsBinding.instance
 //        .addPostFrameCallback((_) => onLoad());
 //  }
-  void onLoad(){
+  void onLoad() {
     scrollController.animateTo(
       scrollController.position.maxScrollExtent,
       curve: Curves.easeOut,
@@ -91,7 +129,12 @@ class _ChatState extends State<Chat> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection("chat").document(widget.chatID).collection('messages').snapshots(),
+
+                stream: _firestore
+                    .collection("chat")
+                    .document(chatIDD)
+                    .collection('messages')
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return Center(
