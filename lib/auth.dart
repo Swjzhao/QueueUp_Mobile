@@ -26,6 +26,7 @@ class _CreateAccountState extends State<CreateAccount> {
         .collection("users")
         .document(user.uid)
         .setData({"email":email, "userid":user.uid, "messages": map});
+
     Navigator.push(
         context,
         MaterialPageRoute(

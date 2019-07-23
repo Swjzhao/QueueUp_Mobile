@@ -1,13 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'auth.dart';
 
 class Chat extends StatefulWidget {
   static const String id = "CHAT";
   final FirebaseUser user;
+  final String other;
+  final String chatID;
 
-  const Chat({Key key, this.user}) : super(key: key);
+  const Chat({Key key, this.user, this.other, this.chatID}) : super(key: key);
 
   @override
   _ChatState createState() => _ChatState();
@@ -22,7 +25,7 @@ class _ChatState extends State<Chat> {
 
   Future<void> callback() async {
     if (messageController.text.length > 0) {
-      await _firestore.collection('messages').add({
+      await _firestore.collection("chat").document(widget.chatID).collection('messages').add({
         'text': messageController.text,
         'from': widget.user.email,
       });
@@ -33,6 +36,31 @@ class _ChatState extends State<Chat> {
         duration: const Duration(milliseconds: 300),
       );
     }
+  }
+
+  @override
+  void didUpdateWidget(Widget oldWidget){
+    onLoad();
+  }
+//  void initState(){
+//    super.initState();
+//    WidgetsBinding.instance
+//        .addPostFrameCallback((_) => onLoad());
+//  }
+  void onLoad(){
+    scrollController.animateTo(
+      scrollController.position.maxScrollExtent,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  void scrollToBottom() {
+    scrollController.animateTo(
+      scrollController.position.maxScrollExtent,
+      curve: Curves.easeOut,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   @override
@@ -63,7 +91,7 @@ class _ChatState extends State<Chat> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('messages').snapshots(),
+                stream: _firestore.collection("chat").document(widget.chatID).collection('messages').snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
                     return Center(
@@ -81,6 +109,7 @@ class _ChatState extends State<Chat> {
                       .toList();
 
                   return ListView(
+                    shrinkWrap: true,
                     controller: scrollController,
                     children: <Widget>[
                       ...messages,
@@ -100,6 +129,7 @@ class _ChatState extends State<Chat> {
                         decoration: new InputDecoration.collapsed(
                             hintText: "Send a message"),
                         controller: messageController,
+                        onTap: () => scrollToBottom(),
                         onSubmitted: (value) => callback(),
                       ),
                     ),
@@ -170,12 +200,12 @@ class Message extends StatelessWidget {
                     ),
                   ),
                 ),
-                new Container(
-                  margin: const EdgeInsets.only(left: 5.0),
-                  child: new CircleAvatar(
-                    child: new Text(from[0]),
-                  ),
-                ),
+//                new Container(
+//                  margin: const EdgeInsets.only(left: 5.0),
+//                  child: new CircleAvatar(
+//                    child: new Text(from[0]),
+//                  ),
+//                ),
               ],
             ),
           ),
