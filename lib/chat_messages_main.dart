@@ -117,6 +117,8 @@ class _UserState extends State<User> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
 
+
+
   String getChatID(){
     String chatID;
 
@@ -142,13 +144,13 @@ class _UserState extends State<User> {
     }).then((snap) {
       docID = snap.documentID;
     });
-    _firestore.collection('users').document(widget.user.uid).get().then((snapp){
+    await _firestore.collection('users').document(widget.user.uid).get().then((snapp){
       Map<dynamic, dynamic> messages = snapp.data['messages'];
       messages[widget.userid] = docID;
       _firestore.collection('users').document(widget.user.uid).updateData({"messages":messages});
     });
     //docs = snapshot.data
-    _firestore.collection('users').document(widget.userid).get().then((snapp){
+    await _firestore.collection('users').document(widget.userid).get().then((snapp){
 
       Map<dynamic, dynamic> otherMessages = snapp.data['messages'];
       otherMessages[widget.user.uid] = docID;
