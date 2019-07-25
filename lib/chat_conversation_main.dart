@@ -65,6 +65,8 @@ class _ChatState extends State<Chat> {
           .add({
         'text': messageController.text,
         'from': widget.user.email,
+        'time':new DateTime.now().millisecondsSinceEpoch,
+
       });
       messageController.clear();
       scrollController.animateTo(
@@ -133,7 +135,7 @@ class _ChatState extends State<Chat> {
                 stream: _firestore
                     .collection("chat")
                     .document(chatIDD)
-                    .collection('messages')
+                    .collection('messages').orderBy("time")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
@@ -147,6 +149,7 @@ class _ChatState extends State<Chat> {
                       .map((doc) => Message(
                             from: doc.data['from'],
                             text: doc.data['text'],
+                            time: doc.data['time'],
                             me: widget.user.email == doc.data['from'],
                           ))
                       .toList();
@@ -213,10 +216,11 @@ class SendButton extends StatelessWidget {
 class Message extends StatelessWidget {
   final String from;
   final String text;
+  final int time;
 
   final bool me;
 
-  const Message({Key key, this.from, this.text, this.me}) : super(key: key);
+  const Message({Key key, this.from, this.text, this.me, this.time}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

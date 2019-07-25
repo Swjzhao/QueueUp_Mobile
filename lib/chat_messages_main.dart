@@ -117,8 +117,6 @@ class _UserState extends State<User> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
 
-
-
   String getChatID(){
     String chatID;
 
