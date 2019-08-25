@@ -80,6 +80,10 @@ class _ChatState extends State<Chat> {
         'from': widget.user.email,
         'time': new DateTime.now().millisecondsSinceEpoch,
       });
+      await _firestore
+          .collection("chat")
+          .document(chatIDD)
+          .updateData({"time": new DateTime.now().millisecondsSinceEpoch});
       messageController.clear();
       scrollController.animateTo(
         scrollController.position.maxScrollExtent,

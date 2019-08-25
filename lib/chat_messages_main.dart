@@ -86,6 +86,7 @@ class _ChatMessageState extends State<Chat_Messages> {
                 stream: _firestore
                     .collection('chat')
                     .where("from", isEqualTo: widget.user.email)
+                    .orderBy("time")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
