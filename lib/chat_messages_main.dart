@@ -13,14 +13,6 @@ class Chat_Messages extends StatefulWidget {
   _ChatMessageState createState() => _ChatMessageState();
 }
 
-//child: StreamBuilder<DocumentSnapshot>(
-//stream: _firestore.collection('messages').document(widget.user.uid).snapshots(),
-//builder: (context, snapshot){
-//snapshot.data.
-//ret
-//}
-//)
-
 class _ChatMessageState extends State<Chat_Messages> {
   final _scaffoldKey = new GlobalKey<ScaffoldState>();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -85,6 +77,49 @@ class _ChatMessageState extends State<Chat_Messages> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('chat')
+                    .where("from", isEqualTo: widget.user.email)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+
+                  List<DocumentSnapshot> docs = snapshot.data.documents;
+                  List<Widget> users = docs
+                      .map((doc) => UserFriend(
+                            user: widget.user,
+                            email: doc.data['from'],
+                            other: doc.data['to'],
+                            chatID: doc.documentID,
+                            messages: doc.data['messages'],
+                          ))
+                      .toList();
+
+                  return ListView.separated(
+                    controller: scrollController,
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      return users[index];
+                    },
+                    separatorBuilder: (context, index) {
+                      return Divider();
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: new FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,
         child: new Icon(
@@ -108,54 +143,67 @@ class User extends StatefulWidget {
 
   @override
   _UserState createState() => _UserState();
-
 }
 
-
 class _UserState extends State<User> {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;
 
-  String getChatID(){
+  String getChatID() {
     String chatID;
 
-    _firestore.collection('users').document(widget.user.uid).get().then((snapp){
+    _firestore
+        .collection('users')
+        .document(widget.user.uid)
+        .get()
+        .then((snapp) {
       Map<dynamic, dynamic> messages = snapp.data['messages'];
-      if(messages.containsKey(widget.userid)){
+      if (messages.containsKey(widget.userid)) {
         chatID = messages[widget.userid];
-      }else{
+      } else {
         callback();
         chatID = messages[widget.userid];
       }
-
     });
     return chatID;
   }
 
-  Future<void> callback() async{
+  Future<void> callback() async {
     String docID;
 
     await _firestore.collection('chat').add({
-      'to':widget.email,
+      'to': widget.email,
       'from': widget.user.email,
     }).then((snap) {
       docID = snap.documentID;
     });
-    await _firestore.collection('users').document(widget.user.uid).get().then((snapp){
+    await _firestore
+        .collection('users')
+        .document(widget.user.uid)
+        .get()
+        .then((snapp) {
       Map<dynamic, dynamic> messages = snapp.data['messages'];
       messages[widget.userid] = docID;
-      _firestore.collection('users').document(widget.user.uid).updateData({"messages":messages});
+      _firestore
+          .collection('users')
+          .document(widget.user.uid)
+          .updateData({"messages": messages});
     });
     //docs = snapshot.data
-    await _firestore.collection('users').document(widget.userid).get().then((snapp){
-
+    await _firestore
+        .collection('users')
+        .document(widget.userid)
+        .get()
+        .then((snapp) {
       Map<dynamic, dynamic> otherMessages = snapp.data['messages'];
       otherMessages[widget.user.uid] = docID;
-      _firestore.collection('users').document(widget.userid).updateData({"messages":otherMessages});
+      _firestore
+          .collection('users')
+          .document(widget.userid)
+          .updateData({"messages": otherMessages});
     });
-
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -194,16 +242,82 @@ class _UserState extends State<User> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => Chat(
-                        chatID: chatID,
-                        user: widget.user,
-                        other: widget.userid,
-                      )));
+                            chatID: chatID,
+                            user: widget.user,
+                            other: widget.userid,
+                          )));
             },
-
           )
         ],
       ),
     );
   }
+}
 
+class UserFriend extends StatefulWidget {
+  final String other;
+  final String email;
+  final String chatID;
+  final FirebaseUser user;
+  final Map<dynamic, dynamic> messages;
+
+  const UserFriend(
+      {Key key, this.user, this.email, this.chatID, this.other, this.messages})
+      : super(key: key);
+
+  @override
+  _UserFriendState createState() => _UserFriendState();
+}
+
+class _UserFriendState extends State<UserFriend> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final Firestore _firestore = Firestore.instance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: new Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          new ListTile(
+            leading: new CircleAvatar(
+              foregroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Colors.grey,
+              //backgroundImage: new NetworkImage(dummyData[i].avatarUrl),
+            ),
+            title: new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                new Text(
+                  widget.other,
+                  style: new TextStyle(fontWeight: FontWeight.bold),
+                ),
+//                  new Text(
+//                    dummyData[i].time,
+//                    style: new TextStyle(color: Colors.grey, fontSize: 14.0),
+//                  ),
+              ],
+            ),
+            subtitle: new Container(
+              padding: const EdgeInsets.only(top: 5.0),
+              child: new Text(
+                widget.other,
+                style: new TextStyle(color: Colors.grey, fontSize: 15.0),
+              ),
+            ),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Chat(
+                            chatID: widget.chatID,
+                            user: widget.user,
+                            other: widget.other,
+                          )));
+            },
+          )
+        ],
+      ),
+    );
+  }
 }

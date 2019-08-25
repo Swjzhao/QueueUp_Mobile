@@ -35,7 +35,7 @@ class _Game_SessionsState extends State<Game_Sessions> {
           ),
         );
       }),
-    ));
+    )); 
     // Generate 100 widgets that display their index in the List.
 //          children: <Widget>[
 //            Expanded(

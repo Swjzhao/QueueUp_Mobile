@@ -31,32 +31,45 @@ class _ChatState extends State<Chat> {
         .then((snapp) {
       Map<dynamic, dynamic> messages = snapp.data['messages'];
       String temp = messages[widget.other];
-      return  temp;
+      return temp;
     });
   }
+
   String chatIDD;
-  void initState(){
-     _firestore
+  void initState() {
+    _firestore
         .collection('users')
         .document(widget.user.uid)
         .get()
         .then((snapp) {
       Map<dynamic, dynamic> messages = snapp.data['messages'];
-      chatIDD = messages[widget.other];
+      if (widget.chatID != null) {
+        chatIDD = widget.chatID;
+      } else {
+        chatIDD = messages[widget.other];
+      }
     });
   }
 
   Future<void> callback() async {
-
     String chatIDD;
+    if (widget.chatID != null) {
+      chatIDD = widget.chatID;
+    }
     await _firestore
         .collection('users')
         .document(widget.user.uid)
         .get()
         .then((snapp) {
       Map<dynamic, dynamic> messages = snapp.data['messages'];
-      chatIDD = messages[widget.other];
+
+      if (widget.chatID != null) {
+        chatIDD = widget.chatID;
+      } else {
+        chatIDD = messages[widget.other];
+      }
     });
+
     if (messageController.text.length > 0) {
       await _firestore
           .collection("chat")
@@ -65,8 +78,7 @@ class _ChatState extends State<Chat> {
           .add({
         'text': messageController.text,
         'from': widget.user.email,
-        'time':new DateTime.now().millisecondsSinceEpoch,
-
+        'time': new DateTime.now().millisecondsSinceEpoch,
       });
       messageController.clear();
       scrollController.animateTo(
@@ -131,11 +143,11 @@ class _ChatState extends State<Chat> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-
                 stream: _firestore
                     .collection("chat")
                     .document(chatIDD)
-                    .collection('messages').orderBy("time")
+                    .collection('messages')
+                    .orderBy("time")
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData)
@@ -220,7 +232,8 @@ class Message extends StatelessWidget {
 
   final bool me;
 
-  const Message({Key key, this.from, this.text, this.me, this.time}) : super(key: key);
+  const Message({Key key, this.from, this.text, this.me, this.time})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
