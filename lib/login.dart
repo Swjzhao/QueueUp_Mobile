@@ -18,6 +18,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(),
       home: LoginScreen(title: 'CHAT DEMO'),
       debugShowCheckedModeBanner: false,
+      routes: {
+        CreateAccount.id: (context) => CreateAccount(),
+      },
     );
   }
 }
@@ -202,18 +205,9 @@ class LoginScreenState extends State<LoginScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Hero(
-                tag: 'logo',
-                child: Container(),
-              ),
-              Text(
-                "QueueUp",
-                style: TextStyle(fontSize: 40.0),
-              ),
-            ],
+          Text(
+            "QueueUp",
+            style: TextStyle(fontSize: 40.0),
           ),
           SizedBox(
             height: 40.0,
@@ -244,11 +238,11 @@ class LoginScreenState extends State<LoginScreen> {
               await loginUser();
             },
           ),
-          SizedBox(
-            height: 40.0,
-          ), CustomButton(
-            text:"Create an Account",
-            callback:(){Navigator.of(context).pushNamed("CREATEACCOUNT");},
+          CustomButtonSmall(
+            text: "Create an Account",
+            callback: () {
+              Navigator.of(context).pushNamed(CreateAccount.id);
+            },
           ),
           SizedBox(
             height: 40.0,
@@ -264,18 +258,7 @@ class LoginScreenState extends State<LoginScreen> {
               splashColor: Colors.transparent,
               textColor: Colors.white,
               padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
-          Positioned(
-            child: isLoading
-                ? Container(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                      ),
-                    ),
-                    color: Colors.white.withOpacity(0.8),
-                  )
-                : Container(),
-          )
+
         ],
       ),
     );

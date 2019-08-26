@@ -35,6 +35,7 @@ class MainScreenState extends State<MainScreen> {
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
   bool isLoading = false;
+  bool isUsingGoogle = false;
   List<Choice> choices = const <Choice>[
     const Choice(title: 'Settings', icon: Icons.settings),
     const Choice(title: 'Log out', icon: Icons.exit_to_app),
@@ -45,6 +46,13 @@ class MainScreenState extends State<MainScreen> {
     super.initState();
     registerNotification();
     configLocalNotification();
+    checkIsUsingGoogle();
+  }
+
+  void checkIsUsingGoogle() async {
+
+    isUsingGoogle = await googleSignIn.isSignedIn();
+   
   }
 
   void registerNotification() {
@@ -198,9 +206,10 @@ class MainScreenState extends State<MainScreen> {
     });
 
     await FirebaseAuth.instance.signOut();
-    await googleSignIn.disconnect();
-    await googleSignIn.signOut();
-
+    if(isUsingGoogle) {
+      await googleSignIn.disconnect();
+      await googleSignIn.signOut();
+    }
     this.setState(() {
       isLoading = false;
     });

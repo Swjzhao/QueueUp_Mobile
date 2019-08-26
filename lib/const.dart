@@ -29,3 +29,26 @@ class CustomButton extends StatelessWidget {
     );
   }
 }
+
+class CustomButtonSmall extends StatelessWidget {
+  final VoidCallback callback;
+  final String text;
+
+  const CustomButtonSmall({Key key, this.callback, this.text}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child:Material(
+            color: Colors.blueGrey,
+            elevation:6.0,
+            borderRadius: BorderRadius.circular(30.0),
+            child: MaterialButton(
+              onPressed: callback,
+              minWidth: 200.0,
+              height: 25.0,
+              child: Text(text),
+            )
+        )
+    );
+  }
+}
