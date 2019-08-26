@@ -16,6 +16,8 @@ class CreateAccount extends StatefulWidget {
 class _CreateAccountState extends State<CreateAccount> {
   String email;
   String password;
+  String confirmpassword;
+  String username;
   SharedPreferences prefs;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Firestore _firestore = Firestore.instance;

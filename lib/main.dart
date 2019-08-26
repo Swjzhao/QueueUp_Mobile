@@ -15,6 +15,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'package:queueup_mobileapp/tabs/chat_tab.dart';
+import 'package:queueup_mobileapp/tabs/explore_tab.dart';
+import 'package:queueup_mobileapp/tabs/game_session_tab.dart';
+
 void main() => runApp(MyApp());
 
 class MainScreen extends StatefulWidget {
@@ -26,13 +30,15 @@ class MainScreen extends StatefulWidget {
   State createState() => MainScreenState(currentUserId: currentUserId);
 }
 
-class MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   MainScreenState({Key key, @required this.currentUserId});
 
   final String currentUserId;
   final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      new FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
+  TabController _tabController;
 
   bool isLoading = false;
   bool isUsingGoogle = false;
@@ -47,12 +53,11 @@ class MainScreenState extends State<MainScreen> {
     registerNotification();
     configLocalNotification();
     checkIsUsingGoogle();
+    _tabController = new TabController(vsync: this, initialIndex: 1, length: 3);
   }
 
   void checkIsUsingGoogle() async {
-
     isUsingGoogle = await googleSignIn.isSignedIn();
-   
   }
 
   void registerNotification() {
@@ -72,16 +77,21 @@ class MainScreenState extends State<MainScreen> {
 
     firebaseMessaging.getToken().then((token) {
       print('token: $token');
-      Firestore.instance.collection('users').document(currentUserId).updateData({'pushToken': token});
+      Firestore.instance
+          .collection('users')
+          .document(currentUserId)
+          .updateData({'pushToken': token});
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
     });
   }
 
   void configLocalNotification() {
-    var initializationSettingsAndroid = new AndroidInitializationSettings('app_icon');
+    var initializationSettingsAndroid =
+        new AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS = new IOSInitializationSettings();
-    var initializationSettings = new InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
+    var initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -89,13 +99,16 @@ class MainScreenState extends State<MainScreen> {
     if (choice.title == 'Log out') {
       handleSignOut();
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => Settings()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Settings()));
     }
   }
 
   void showNotification(message) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.dfa.flutterchatdemo': 'com.duytq.flutterchatdemo',
+      Platform.isAndroid
+          ? 'com.dfa.flutterchatdemo'
+          : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       'your channel description',
       playSound: true,
@@ -104,10 +117,10 @@ class MainScreenState extends State<MainScreen> {
       priority: Priority.High,
     );
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
-    var platformChannelSpecifics =
-        new NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-        0, message['title'].toString(), message['body'].toString(), platformChannelSpecifics,
+    var platformChannelSpecifics = new NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(0, message['title'].toString(),
+        message['body'].toString(), platformChannelSpecifics,
         payload: json.encode(message));
   }
 
@@ -121,7 +134,8 @@ class MainScreenState extends State<MainScreen> {
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            contentPadding: EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
+            contentPadding:
+                EdgeInsets.only(left: 0.0, right: 0.0, top: 0.0, bottom: 0.0),
             children: <Widget>[
               Container(
                 color: themeColor,
@@ -140,7 +154,10 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'Exit app',
-                      style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       'Are you sure to exit app?',
@@ -164,7 +181,8 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'CANCEL',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -184,7 +202,8 @@ class MainScreenState extends State<MainScreen> {
                     ),
                     Text(
                       'YES',
-                      style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: primaryColor, fontWeight: FontWeight.bold),
                     )
                   ],
                 ),
@@ -206,7 +225,7 @@ class MainScreenState extends State<MainScreen> {
     });
 
     await FirebaseAuth.instance.signOut();
-    if(isUsingGoogle) {
+    if (isUsingGoogle) {
       await googleSignIn.disconnect();
       await googleSignIn.signOut();
     }
@@ -214,8 +233,9 @@ class MainScreenState extends State<MainScreen> {
       isLoading = false;
     });
 
-    Navigator.of(context)
-        .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => MyApp()), (Route<dynamic> route) => false);
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => MyApp()),
+        (Route<dynamic> route) => false);
   }
 
   @override
@@ -225,6 +245,19 @@ class MainScreenState extends State<MainScreen> {
         title: Text(
           'MAIN',
           style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+        ),
+        bottom: new TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          tabs: <Widget>[
+            new Tab(text: "Sessions"),
+            new Tab(
+              text: "Chats",
+            ),
+            new Tab(
+              text: "Swipe",
+            ),
+          ],
         ),
         centerTitle: true,
         actions: <Widget>[
@@ -255,124 +288,17 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       body: WillPopScope(
-        child: Stack(
+        child: new TabBarView(
+          controller: _tabController,
           children: <Widget>[
-            // List
-            Container(
-              child: StreamBuilder(
-                stream: Firestore.instance.collection('users').snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                      ),
-                    );
-                  } else {
-                    return ListView.builder(
-                      padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) => buildItem(context, snapshot.data.documents[index]),
-                      itemCount: snapshot.data.documents.length,
-                    );
-                  }
-                },
-              ),
-            ),
-
-            // Loading
-            Positioned(
-              child: isLoading
-                  ? Container(
-                      child: Center(
-                        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
-                      ),
-                      color: Colors.white.withOpacity(0.8),
-                    )
-                  : Container(),
-            )
+            GameSessionTab(currentUserId: currentUserId),
+            ChatTab(currentUserId: currentUserId),
+            ExploreTab(currentUserId: currentUserId),
           ],
         ),
         onWillPop: onBackPress,
       ),
     );
-  }
-
-  Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    if (document['id'] == currentUserId) {
-      return Container();
-    } else {
-      return Container(
-        child: FlatButton(
-          child: Row(
-            children: <Widget>[
-              Material(
-                child: document['photoUrl'] != null
-                    ? CachedNetworkImage(
-                        placeholder: (context, url) => Container(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                          ),
-                          width: 50.0,
-                          height: 50.0,
-                          padding: EdgeInsets.all(15.0),
-                        ),
-                        imageUrl: document['photoUrl'],
-                        width: 50.0,
-                        height: 50.0,
-                        fit: BoxFit.cover,
-                      )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50.0,
-                        color: greyColor,
-                      ),
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                clipBehavior: Clip.hardEdge,
-              ),
-              Flexible(
-                child: Container(
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          'Nickname: ${document['nickname']}',
-                          style: TextStyle(color: primaryColor),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                      ),
-                      Container(
-                        child: Text(
-                          'About me: ${document['aboutMe'] ?? 'Not available'}',
-                          style: TextStyle(color: primaryColor),
-                        ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                      )
-                    ],
-                  ),
-                  margin: EdgeInsets.only(left: 20.0),
-                ),
-              ),
-            ],
-          ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Chat(
-                          peerId: document.documentID,
-                          peerAvatar: document['photoUrl'],
-                        )));
-          },
-          color: greyColor2,
-          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-        ),
-        margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
-      );
-    }
   }
 }
 
