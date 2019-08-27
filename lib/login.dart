@@ -9,6 +9,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:queueup_mobileapp/auth.dart';
+import 'package:queueup_mobileapp/createprofile.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         CreateAccount.id: (context) => CreateAccount(),
+        CreateProfile.id: (context) => CreateProfile()
       },
     );
   }
@@ -76,10 +78,17 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> loginUser() async {
-    FirebaseUser firebaseUser = await firebaseAuth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    FirebaseUser firebaseUser = null;
+    try {
+      FirebaseUser firebaseUser = await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (error) {
+      List<String> errors = error.toString().split(',');
+      String errorMsg = "Error: " + errors[1];
+      Fluttertoast.showToast(msg: errorMsg);
+    }
 
     if (firebaseUser != null) {
       // Check is already sign up
@@ -238,10 +247,16 @@ class LoginScreenState extends State<LoginScreen> {
               await loginUser();
             },
           ),
-          CustomButtonSmall(
+          CustomButton(
             text: "Create an Account",
             callback: () {
               Navigator.of(context).pushNamed(CreateAccount.id);
+            },
+          ),
+          CustomButtonSmall(
+            text: "Test Functions",
+            callback: () {
+              Navigator.of(context).pushNamed(CreateProfile.id);
             },
           ),
           SizedBox(
@@ -258,7 +273,6 @@ class LoginScreenState extends State<LoginScreen> {
               splashColor: Colors.transparent,
               textColor: Colors.white,
               padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
-
         ],
       ),
     );

@@ -37,52 +37,66 @@ class _CreateAccountState extends State<CreateAccount> {
   }
 
   Future<void> registerUser() async {
-    FirebaseUser firebaseUser = await _auth.createUserWithEmailAndPassword(
-        email: email, password: password);
-    if (firebaseUser != null) {
-      // Check is already sign up
-      final QuerySnapshot result = await Firestore.instance
-          .collection('users')
-          .where('id', isEqualTo: firebaseUser.uid)
-          .getDocuments();
-      final List<DocumentSnapshot> documents = result.documents;
-      if (documents.length == 0) {
-        // Update data to server if new user
-        Firestore.instance
-            .collection('users')
-            .document(firebaseUser.uid)
-            .setData({
-          //Need to add custom stuff
-          'nickname': "TempName",
-          'photoUrl':
-              "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media",
-          'id': firebaseUser.uid,
-          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-          'chattingWith': null
-        });
-
-        // Write data to local
-        currentUser = firebaseUser;
-        await prefs.setString('id', currentUser.uid);
-        await prefs.setString('nickname', "TempName");
-        await prefs.setString('photoUrl',
-            "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media");
-      } else {
-        // Write data to local
-        await prefs.setString('id', documents[0]['id']);
-        await prefs.setString('nickname', documents[0]['nickname']);
-        await prefs.setString('photoUrl', documents[0]['photoUrl']);
-        await prefs.setString('aboutMe', documents[0]['aboutMe']);
-      }
-      Fluttertoast.showToast(msg: "Sign in success");
-
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  MainScreen(currentUserId: firebaseUser.uid)));
+    if (password != confirmpassword) {
+      Fluttertoast.showToast(msg: "Password does not match!");
+    } else if (username == "") {
+      Fluttertoast.showToast(msg: "Username cannot be empty!");
     } else {
-      Fluttertoast.showToast(msg: "Sign in fail");
+      FirebaseUser firebaseUser = null;
+      try {
+        firebaseUser = await _auth.createUserWithEmailAndPassword(
+            email: email, password: password);
+      } catch (error) {
+        List<String> errors = error.toString().split(',');
+        String errorMsg = "Error: " + errors[1];
+        Fluttertoast.showToast(msg: errorMsg);
+      }
+
+      if (firebaseUser != null) {
+        // Check is already sign up
+        final QuerySnapshot result = await Firestore.instance
+            .collection('users')
+            .where('id', isEqualTo: firebaseUser.uid)
+            .getDocuments();
+        final List<DocumentSnapshot> documents = result.documents;
+        if (documents.length == 0) {
+          // Update data to server if new user
+          Firestore.instance
+              .collection('users')
+              .document(firebaseUser.uid)
+              .setData({
+            //Need to add custom stuff
+            'nickname': username,
+            'photoUrl':
+                "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media",
+            'id': firebaseUser.uid,
+            'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+            'chattingWith': null
+          });
+
+          // Write data to local
+          currentUser = firebaseUser;
+          await prefs.setString('id', currentUser.uid);
+          await prefs.setString('nickname', "TempName");
+          await prefs.setString('photoUrl',
+              "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media");
+        } else {
+          // Write data to local
+          await prefs.setString('id', documents[0]['id']);
+          await prefs.setString('nickname', documents[0]['nickname']);
+          await prefs.setString('photoUrl', documents[0]['photoUrl']);
+          await prefs.setString('aboutMe', documents[0]['aboutMe']);
+        }
+        Fluttertoast.showToast(msg: "Sign in success");
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    MainScreen(currentUserId: firebaseUser.uid)));
+      } else {
+        Fluttertoast.showToast(msg: "Sign in fail");
+      }
     }
   }
 

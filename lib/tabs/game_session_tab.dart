@@ -15,7 +15,7 @@ class GameSessionTab extends StatefulWidget {
 }
 
 class GameSessionTabState extends State<GameSessionTab> {
-  GameSessionTabState({Key key, @required this.currentUserId});
+   GameSessionTabState({Key key, @required this.currentUserId});
   String currentUserId;
 
   @override
