@@ -107,9 +107,9 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   void showNotification(message) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
       Platform.isAndroid
-          ? 'com.dfa.flutterchatdemo'
-          : 'com.duytq.flutterchatdemo',
-      'Flutter chat demo',
+          ? 'com.queueupgames.queueup_mobileapp'
+          : '',
+      'QueueUp',
       'your channel description',
       playSound: true,
       enableVibration: true,

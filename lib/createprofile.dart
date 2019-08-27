@@ -430,20 +430,18 @@ class CreateProfile3 extends StatefulWidget {
   static const String id = "CREATEPROFILE3";
 
   final String currentUserId;
-  final BuildContext context;
 
-  CreateProfile3({Key key, this.context, @required this.currentUserId})
+  CreateProfile3({Key key,  @required this.currentUserId})
       : super(key: key);
 
   @override
   State createState() =>
-      new CreateProfile3State(context: context, currentUserId: currentUserId);
+      new CreateProfile3State( currentUserId: currentUserId);
 }
 
 class CreateProfile3State extends State<CreateProfile3> {
-  CreateProfile3State({Key key, this.context, @required this.currentUserId});
+  CreateProfile3State({Key key,  @required this.currentUserId});
   String currentUserId;
-  BuildContext context;
 
   SharedPreferences prefs;
 
@@ -544,7 +542,7 @@ class CreateProfile3State extends State<CreateProfile3> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => MainScreen(currentUserId: currentUserId)));
+              builder: (context) => MainScreen(currentUserId: id)));
     }).catchError((err) {
       setState(() {
         isLoading = false;

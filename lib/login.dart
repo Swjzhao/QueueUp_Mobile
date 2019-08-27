@@ -108,7 +108,8 @@ class LoginScreenState extends State<LoginScreen> {
           'photoUrl': firebaseUser.photoUrl,
           'id': firebaseUser.uid,
           'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-          'chattingWith': null
+          'chattingWith': null,
+          'status': "Online"
         });
 
         // Write data to local
@@ -116,12 +117,16 @@ class LoginScreenState extends State<LoginScreen> {
         await prefs.setString('id', currentUser.uid);
         await prefs.setString('username', currentUser.displayName);
         await prefs.setString('photoUrl', currentUser.photoUrl);
+        await prefs.setString('photoUrl', currentUser.photoUrl);
+
       } else {
         // Write data to local
         await prefs.setString('id', documents[0]['id']);
         await prefs.setString('username', documents[0]['username']);
         await prefs.setString('photoUrl', documents[0]['photoUrl']);
         await prefs.setString('aboutMe', documents[0]['aboutMe']);
+        await prefs.setString('photoUrl',documents[0]['status'] );
+
       }
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
