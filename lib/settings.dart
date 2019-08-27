@@ -9,6 +9,7 @@ import 'package:queueup_mobileapp/const.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:queueup_mobileapp/MultiSelectClip.dart';
 
 class Settings extends StatelessWidget {
   @override
@@ -32,20 +33,34 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class SettingsScreenState extends State<SettingsScreen> {
-  TextEditingController controllerNickname;
+  TextEditingController controllerUsername;
   TextEditingController controllerAboutMe;
 
   SharedPreferences prefs;
 
+  List<String> sliderList1 = ["Casual", "", "Ranked", "", "Hardcore"];
+  List<String> sliderList2 = [
+    "Mic Off, Chat Off",
+    "Shy",
+    "Indifferent",
+    "Chatty",
+    "Open Mic"
+  ];
+  // Need to fix update games
+
   String id = '';
-  String nickname = '';
+  String username = '';
   String aboutMe = '';
   String photoUrl = '';
+  double sliderVal1 = 2;
+  double sliderVal2 = 2;
+  String dropdownValue = 'Male';
 
+  final Firestore _firestore = Firestore.instance;
   bool isLoading = false;
   File avatarImageFile;
 
-  final FocusNode focusNodeNickname = new FocusNode();
+  final FocusNode focusNodeUsername = new FocusNode();
   final FocusNode focusNodeAboutMe = new FocusNode();
 
   @override
@@ -57,11 +72,14 @@ class SettingsScreenState extends State<SettingsScreen> {
   void readLocal() async {
     prefs = await SharedPreferences.getInstance();
     id = prefs.getString('id') ?? '';
-    nickname = prefs.getString('nickname') ?? '';
+    username = prefs.getString('username') ?? '';
     aboutMe = prefs.getString('aboutMe') ?? '';
     photoUrl = prefs.getString('photoUrl') ?? '';
+    sliderVal1 = prefs.getDouble('seriousiness');
+    sliderVal2 = prefs.getDouble('playerType');
+    dropdownValue = prefs.getString('gender');
 
-    controllerNickname = new TextEditingController(text: nickname);
+    controllerUsername = new TextEditingController(text: username);
     controllerAboutMe = new TextEditingController(text: aboutMe);
 
     // Force refresh input
@@ -90,10 +108,11 @@ class SettingsScreenState extends State<SettingsScreen> {
         storageTaskSnapshot = value;
         storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
           photoUrl = downloadUrl;
-          Firestore.instance
-              .collection('users')
-              .document(id)
-              .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
+          Firestore.instance.collection('users').document(id).updateData({
+            'username': username,
+            'aboutMe': aboutMe,
+            'photoUrl': photoUrl
+          }).then((data) async {
             await prefs.setString('photoUrl', photoUrl);
             setState(() {
               isLoading = false;
@@ -126,21 +145,28 @@ class SettingsScreenState extends State<SettingsScreen> {
   }
 
   void handleUpdateData() {
-    focusNodeNickname.unfocus();
+    focusNodeUsername.unfocus();
     focusNodeAboutMe.unfocus();
 
     setState(() {
       isLoading = true;
     });
 
-    Firestore.instance
-        .collection('users')
-        .document(id)
-        .updateData({'nickname': nickname, 'aboutMe': aboutMe, 'photoUrl': photoUrl}).then((data) async {
-      await prefs.setString('nickname', nickname);
+    Firestore.instance.collection('users').document(id).updateData({
+      'username': username,
+      'aboutMe': aboutMe,
+      'photoUrl': photoUrl,
+      'seriousiness': sliderVal1,
+      'playerType':sliderVal2,
+      'gender':dropdownValue
+
+    }).then((data) async {
+      await prefs.setString('username', username);
       await prefs.setString('aboutMe', aboutMe);
       await prefs.setString('photoUrl', photoUrl);
-
+      await prefs.setDouble('seriousiness',sliderVal1);
+      await prefs.setDouble('playerType', sliderVal2);
+      await prefs.setString('gender', dropdownValue);
       setState(() {
         isLoading = false;
       });
@@ -172,20 +198,23 @@ class SettingsScreenState extends State<SettingsScreen> {
                               ? Material(
                                   child: CachedNetworkImage(
                                     placeholder: (context, url) => Container(
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.0,
-                                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                                          ),
-                                          width: 90.0,
-                                          height: 90.0,
-                                          padding: EdgeInsets.all(20.0),
-                                        ),
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                themeColor),
+                                      ),
+                                      width: 90.0,
+                                      height: 90.0,
+                                      padding: EdgeInsets.all(20.0),
+                                    ),
                                     imageUrl: photoUrl,
                                     width: 90.0,
                                     height: 90.0,
                                     fit: BoxFit.cover,
                                   ),
-                                  borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(45.0)),
                                   clipBehavior: Clip.hardEdge,
                                 )
                               : Icon(
@@ -200,7 +229,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                                 height: 90.0,
                                 fit: BoxFit.cover,
                               ),
-                              borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(45.0)),
                               clipBehavior: Clip.hardEdge,
                             ),
                       IconButton(
@@ -227,52 +257,28 @@ class SettingsScreenState extends State<SettingsScreen> {
                   // Username
                   Container(
                     child: Text(
-                      'Nickname',
-                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
+                      'Username',
+                      style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor),
                     ),
                     margin: EdgeInsets.only(left: 10.0, bottom: 5.0, top: 10.0),
                   ),
                   Container(
                     child: Theme(
-                      data: Theme.of(context).copyWith(primaryColor: primaryColor),
+                      data: Theme.of(context)
+                          .copyWith(primaryColor: primaryColor),
                       child: TextField(
                         decoration: InputDecoration(
-                          hintText: 'Sweetie',
                           contentPadding: new EdgeInsets.all(5.0),
                           hintStyle: TextStyle(color: greyColor),
                         ),
-                        controller: controllerNickname,
+                        controller: controllerUsername,
                         onChanged: (value) {
-                          nickname = value;
+                          username = value;
                         },
-                        focusNode: focusNodeNickname,
-                      ),
-                    ),
-                    margin: EdgeInsets.only(left: 30.0, right: 30.0),
-                  ),
-
-                  // About me
-                  Container(
-                    child: Text(
-                      'About me',
-                      style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: primaryColor),
-                    ),
-                    margin: EdgeInsets.only(left: 10.0, top: 30.0, bottom: 5.0),
-                  ),
-                  Container(
-                    child: Theme(
-                      data: Theme.of(context).copyWith(primaryColor: primaryColor),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Fun, like travel and play PES...',
-                          contentPadding: EdgeInsets.all(5.0),
-                          hintStyle: TextStyle(color: greyColor),
-                        ),
-                        controller: controllerAboutMe,
-                        onChanged: (value) {
-                          aboutMe = value;
-                        },
-                        focusNode: focusNodeAboutMe,
+                        focusNode: focusNodeUsername,
                       ),
                     ),
                     margin: EdgeInsets.only(left: 30.0, right: 30.0),
@@ -280,7 +286,80 @@ class SettingsScreenState extends State<SettingsScreen> {
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "Gender:  ",
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                    SizedBox(
+                      height: 40.0,
+                    ),
+                    DropdownButton<String>(
+                      value: dropdownValue,
+                      onChanged: (String newValue) {
+                        setState(() {
+                          dropdownValue = newValue;
+                        });
+                      },
+                      items: <String>['Male', 'Female', 'Unspecified']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value, style: TextStyle(fontSize: 20.0)),
+                        );
+                      }).toList(),
+                    )
+                  ]),
+              SizedBox(
+                height: 40.0,
+              ),
+              Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        "Which games do you play? :  ",
+                        style: TextStyle(fontSize: 20.0),
+                      ),
+                    )
+                  ]),
+              StreamBuilder<QuerySnapshot>(
+                  stream: _firestore.collection('games').snapshots(),
+                  builder: (context, snapshot) {
+                    List<DocumentSnapshot> docs = snapshot.data.documents;
+                    List<String> reportList = [];
+                    docs
+                        .map((doc) => reportList.add(doc.data['game']))
+                        .toList();
+                    reportList.add("Other");
+                    return MultiSelectChip(reportList);
+                  }),
 
+              Text('How serious are you?', style: TextStyle(fontSize: 20.0)),
+              Slider(
+                  value: sliderVal1,
+                  min: 0,
+                  max: 4,
+                  divisions: 4,
+                  label: sliderList1[sliderVal1.round()],
+                  onChanged: (double value) {
+                    setState(() => sliderVal1 = value);
+                  }),
+              Divider(),
+              Text('What Type of player are you: ',
+                  style: TextStyle(fontSize: 20.0)),
+              Slider(
+                  value: sliderVal2,
+                  min: 0,
+                  max: 4,
+                  divisions: 4,
+                  label: sliderList2[sliderVal2.round()],
+                  onChanged: (double value) {
+                    setState(() => sliderVal2 = value);
+                  }),
               // Button
               Container(
                 child: FlatButton(
@@ -307,7 +386,8 @@ class SettingsScreenState extends State<SettingsScreen> {
           child: isLoading
               ? Container(
                   child: Center(
-                    child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
+                    child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor)),
                   ),
                   color: Colors.white.withOpacity(0.8),
                 )

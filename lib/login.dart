@@ -45,6 +45,7 @@ class LoginScreenState extends State<LoginScreen> {
   bool isLoggedIn = false;
   FirebaseUser currentUser;
 
+
   bool usingGoogle = false;
   String email;
   String password;
@@ -80,7 +81,7 @@ class LoginScreenState extends State<LoginScreen> {
   Future<void> loginUser() async {
     FirebaseUser firebaseUser = null;
     try {
-      FirebaseUser firebaseUser = await firebaseAuth.signInWithEmailAndPassword(
+      firebaseUser = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -103,7 +104,7 @@ class LoginScreenState extends State<LoginScreen> {
             .collection('users')
             .document(firebaseUser.uid)
             .setData({
-          'nickname': firebaseUser.displayName,
+          'username': firebaseUser.displayName,
           'photoUrl': firebaseUser.photoUrl,
           'id': firebaseUser.uid,
           'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -113,12 +114,12 @@ class LoginScreenState extends State<LoginScreen> {
         // Write data to local
         currentUser = firebaseUser;
         await prefs.setString('id', currentUser.uid);
-        await prefs.setString('nickname', currentUser.displayName);
+        await prefs.setString('username', currentUser.displayName);
         await prefs.setString('photoUrl', currentUser.photoUrl);
       } else {
         // Write data to local
         await prefs.setString('id', documents[0]['id']);
-        await prefs.setString('nickname', documents[0]['nickname']);
+        await prefs.setString('username', documents[0]['username']);
         await prefs.setString('photoUrl', documents[0]['photoUrl']);
         await prefs.setString('aboutMe', documents[0]['aboutMe']);
       }
@@ -126,12 +127,19 @@ class LoginScreenState extends State<LoginScreen> {
       this.setState(() {
         isLoading = false;
       });
-
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  MainScreen(currentUserId: firebaseUser.uid)));
+      if (documents[0]['playerType'] == null) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    CreateProfile(currentUserId: firebaseUser.uid)));
+      } else {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    MainScreen(currentUserId: firebaseUser.uid)));
+      }
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
@@ -171,7 +179,7 @@ class LoginScreenState extends State<LoginScreen> {
             .collection('users')
             .document(firebaseUser.uid)
             .setData({
-          'nickname': firebaseUser.displayName,
+          'username': firebaseUser.displayName,
           'photoUrl': firebaseUser.photoUrl,
           'id': firebaseUser.uid,
           'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -181,12 +189,12 @@ class LoginScreenState extends State<LoginScreen> {
         // Write data to local
         currentUser = firebaseUser;
         await prefs.setString('id', currentUser.uid);
-        await prefs.setString('nickname', currentUser.displayName);
+        await prefs.setString('username', currentUser.displayName);
         await prefs.setString('photoUrl', currentUser.photoUrl);
       } else {
         // Write data to local
         await prefs.setString('id', documents[0]['id']);
-        await prefs.setString('nickname', documents[0]['nickname']);
+        await prefs.setString('username', documents[0]['username']);
         await prefs.setString('photoUrl', documents[0]['photoUrl']);
         await prefs.setString('aboutMe', documents[0]['aboutMe']);
       }
@@ -195,11 +203,19 @@ class LoginScreenState extends State<LoginScreen> {
         isLoading = false;
       });
 
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  MainScreen(currentUserId: firebaseUser.uid)));
+      if (documents[0]['playerType'] == null) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    CreateProfile(currentUserId: firebaseUser.uid)));
+      } else {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    MainScreen(currentUserId: firebaseUser.uid)));
+      }
     } else {
       Fluttertoast.showToast(msg: "Sign in fail");
       this.setState(() {
@@ -251,12 +267,6 @@ class LoginScreenState extends State<LoginScreen> {
             text: "Create an Account",
             callback: () {
               Navigator.of(context).pushNamed(CreateAccount.id);
-            },
-          ),
-          CustomButtonSmall(
-            text: "Test Functions",
-            callback: () {
-              Navigator.of(context).pushNamed(CreateProfile.id);
             },
           ),
           SizedBox(

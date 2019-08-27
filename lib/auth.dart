@@ -6,6 +6,7 @@ import 'package:queueup_mobileapp/const.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:queueup_mobileapp/createprofile.dart';
 
 class CreateAccount extends StatefulWidget {
   static const String id = "CREATEACCOUNT";
@@ -66,7 +67,7 @@ class _CreateAccountState extends State<CreateAccount> {
               .document(firebaseUser.uid)
               .setData({
             //Need to add custom stuff
-            'nickname': username,
+            'username': username,
             'photoUrl':
                 "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media",
             'id': firebaseUser.uid,
@@ -77,23 +78,31 @@ class _CreateAccountState extends State<CreateAccount> {
           // Write data to local
           currentUser = firebaseUser;
           await prefs.setString('id', currentUser.uid);
-          await prefs.setString('nickname', "TempName");
+          await prefs.setString('username', "TempName");
           await prefs.setString('photoUrl',
               "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media");
         } else {
           // Write data to local
           await prefs.setString('id', documents[0]['id']);
-          await prefs.setString('nickname', documents[0]['nickname']);
+          await prefs.setString('username', documents[0]['username']);
           await prefs.setString('photoUrl', documents[0]['photoUrl']);
           await prefs.setString('aboutMe', documents[0]['aboutMe']);
         }
         Fluttertoast.showToast(msg: "Sign in success");
 
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    MainScreen(currentUserId: firebaseUser.uid)));
+        if(documents[0]['playerType'] == null){
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      CreateProfile(currentUserId: firebaseUser.uid)));
+        }else {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      MainScreen(currentUserId: firebaseUser.uid)));
+        }
       } else {
         Fluttertoast.showToast(msg: "Sign in fail");
       }
