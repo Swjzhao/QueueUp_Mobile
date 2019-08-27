@@ -126,7 +126,7 @@ class ChatTabState extends State<ChatTab> {
                       ),
                       Container(
                         child: Text(
-                          'About me: ${document['status'] ?? 'Not available'}',
+                          'Status: ${document['status'] ?? 'Not available'}',
                           style: TextStyle(color: primaryColor),
                         ),
                         alignment: Alignment.centerLeft,

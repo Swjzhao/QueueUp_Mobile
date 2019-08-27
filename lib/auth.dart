@@ -106,7 +106,7 @@ class _CreateAccountState extends State<CreateAccount> {
               MaterialPageRoute(
                   builder: (context) =>
                       CreateProfile(currentUserId: firebaseUser.uid)));
- 
+
       } else {
         Fluttertoast.showToast(msg: "Sign in fail");
       }
