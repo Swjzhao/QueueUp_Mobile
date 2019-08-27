@@ -50,6 +50,12 @@ class LoginScreenState extends State<LoginScreen> {
   String email;
   String password;
 
+  TextEditingController controllerEmail;
+  TextEditingController controllerPassword;
+  final FocusNode focusNodeEmail = new FocusNode();
+  final FocusNode focusNodePassword = new FocusNode();
+
+
   @override
   void initState() {
     super.initState();
@@ -243,6 +249,8 @@ class LoginScreenState extends State<LoginScreen> {
             height: 40.0,
           ),
           TextField(
+            controller: controllerEmail,
+            focusNode: focusNodeEmail,
             keyboardType: TextInputType.emailAddress,
             onChanged: (value) => email = value,
             decoration: InputDecoration(
@@ -254,6 +262,8 @@ class LoginScreenState extends State<LoginScreen> {
             height: 40.0,
           ),
           TextField(
+            controller: controllerPassword,
+            focusNode: focusNodePassword,
             autocorrect: false,
             obscureText: true,
             onChanged: (value) => password = value,
