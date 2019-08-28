@@ -108,25 +108,39 @@ class LoginScreenState extends State<LoginScreen> {
           .getDocuments();
       final List<DocumentSnapshot> documents2 = result2.documents;
 
-        // Write data to local
-        await prefs.setString('id', documents[0]['id']);
-        await prefs.setString('username', documents[0]['username']);
-        await prefs.setString('photoUrl', documents[0]['photoUrl']);
-        await prefs.setString('aboutMe', documents[0]['aboutMe']);
-        await prefs.setString('photoUrl', documents[0]['status']);
+      // Write data to local
+      await prefs.setString('id', documents[0]['id']);
+      await prefs.setString('username', documents[0]['username']);
+      await prefs.setString('photoUrl', documents[0]['photoUrl']);
+
+      await prefs.setString('aboutMe', documents[0]['aboutMe']);
+      await prefs.setString('gender', documents[0]['gender']);
+      await prefs.setString('photoUrl', documents[0]['status']);
+      await prefs.setDouble('playerType', documents[0]['playerType']);
+      await prefs.setDouble('seriousiness', documents[0]['seriousiness']);
       await prefs.setString('countryCode', documents[0]['countryCode']);
-        if (documents2.length == 0) {
-          List<String> swipedIds = new List();
-          swipedIds.add(firebaseUser.uid);
-          Firestore.instance
-              .collection('swipes')
-              .document(firebaseUser.uid)
-              .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
-          await prefs.setStringList('swipedIds', swipedIds);
-        } else {
-          List<dynamic> swipedIds = documents2[0]['swipedIds'];
-          await prefs.setStringList('swipedIds', swipedIds.cast<String>().toList());
-        }
+      await prefs.setString('timeStart', documents[0]['timeStart']);
+      await prefs.setString('timeEnd', documents[0]['timeEnd']);
+      await prefs.setString('timeZone', documents[0]['timeZone']);
+
+      List<dynamic> games = documents[0]['games'];
+      await prefs.setStringList('games', games.cast<String>().toList());
+      List<dynamic> daysAvailable = documents[0]['daysAvailable'];
+      await prefs.setStringList('daysAvailable', daysAvailable.cast<String>().toList());
+
+      if (documents2.length == 0) {
+        List<String> swipedIds = new List();
+        swipedIds.add(firebaseUser.uid);
+        Firestore.instance
+            .collection('swipes')
+            .document(firebaseUser.uid)
+            .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
+        await prefs.setStringList('swipedIds', swipedIds);
+      } else {
+        List<dynamic> swipedIds = documents2[0]['swipedIds'];
+        await prefs.setStringList(
+            'swipedIds', swipedIds.cast<String>().toList());
+      }
 
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
@@ -201,6 +215,21 @@ class LoginScreenState extends State<LoginScreen> {
         await prefs.setString('id', currentUser.uid);
         await prefs.setString('username', currentUser.displayName);
         await prefs.setString('photoUrl', currentUser.photoUrl);
+        await prefs.setString('aboutMe', documents[0]['aboutMe']);
+        await prefs.setString('gender', documents[0]['gender']);
+        await prefs.setString('photoUrl', documents[0]['status']);
+        await prefs.setDouble('playerType', documents[0]['playerType']);
+        await prefs.setDouble('seriousiness', documents[0]['seriousiness']);
+        await prefs.setString('countryCode', documents[0]['countryCode']);
+        await prefs.setString('timeStart', documents[0]['timeStart']);
+        await prefs.setString('timeEnd', documents[0]['timeEnd']);
+        await prefs.setString('timeZone', documents[0]['timeZone']);
+
+        List<dynamic> games = documents[0]['games'];
+        await prefs.setStringList('games', games.cast<String>().toList());
+        List<dynamic> daysAvailable = documents[0]['daysAvailable'];
+        await prefs.setStringList('daysAvailable', daysAvailable.cast<String>().toList());
+
         List<String> swipedIds = new List();
         swipedIds.add(firebaseUser.uid);
         Firestore.instance
@@ -256,7 +285,7 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.only( left: 20.0, right: 20.0),
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

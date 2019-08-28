@@ -27,6 +27,7 @@ class ProfileCardState extends State<ProfileCard>
   List data;
   List selectedData = [];
   String id = '';
+
   bool isLoading = true;
   SharedPreferences prefs;
   int dataLengthRef = 0;
@@ -206,9 +207,14 @@ class ProfileCardState extends State<ProfileCard>
               ? Stack(
                   alignment: AlignmentDirectional.center,
                   children: docs.map((item) {
+
+                    List<dynamic> games = item['games'];
+
                     if (docs.indexOf(item) == dataLength - 1) {
                       return profileCard(
                           item.data['photoUrl'],
+                          item.data['username'],
+                          games.cast<String>().toList(),
                           bottom.value,
                           right.value,
                           0.0,
@@ -225,8 +231,11 @@ class ProfileCardState extends State<ProfileCard>
                       backCardPosition = backCardPosition - 10;
                       backCardWidth = backCardWidth + 10;
 
+                      List<dynamic> games = item['games'];
                       return profileCardDummy(
                           item.data['photoUrl'],
+                          item.data['username'],
+                          games.cast<String>().toList(),
                           backCardPosition,
                           0.0,
                           0.0,

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 Positioned profileCardDummy(
     String photoUrl,
+    String username,
+    List<String> games,
     double bottom,
     double right,
     double left,
