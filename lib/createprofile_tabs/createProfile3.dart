@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:day_selector/day_selector.dart';
 
-
 class CreateProfile3 extends StatefulWidget {
   static const String id = "CREATEPROFILE3";
 
@@ -67,11 +66,14 @@ class CreateProfile3State extends State<CreateProfile3> {
     Firestore.instance.collection('users').document(id).updateData({
       'timeStart': timeStart,
       'timeEnd': timeEnd,
-      'daysAvailable': selectedChoices
+      'daysAvailable': selectedChoices,
+      'timeZone': DateTime.now().timeZoneName
     }).then((data) async {
       await prefs.setString('timeStart', timeStart);
       await prefs.setString('timeEnd', timeEnd);
       await prefs.setStringList('daysAvailable', selectedChoices);
+      await prefs.setString('timeZone', DateTime.now().timeZoneName);
+
       setState(() {
         isLoading = false;
       });
@@ -89,7 +91,7 @@ class CreateProfile3State extends State<CreateProfile3> {
 
   Future<Null> _selectTime(BuildContext context) async {
     final TimeOfDay picked =
-    await showTimePicker(context: context, initialTime: _time);
+        await showTimePicker(context: context, initialTime: _time);
     if (picked != null) {
       setState(() {
         _time = picked;
@@ -99,7 +101,7 @@ class CreateProfile3State extends State<CreateProfile3> {
 
   Future<Null> _selectTime2(BuildContext context) async {
     final TimeOfDay picked =
-    await showTimePicker(context: context, initialTime: _time2);
+        await showTimePicker(context: context, initialTime: _time2);
     if (picked != null) {
       setState(() {
         _time2 = picked;
@@ -113,69 +115,68 @@ class CreateProfile3State extends State<CreateProfile3> {
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         child: SafeArea(
             child: Column(children: <Widget>[
-              SizedBox(
-                height: 40.0,
-              ),
-              Text(
-                "Time Preferences",
-                style: TextStyle(fontSize: 40.0),
-              ),
-              SizedBox(
-                height: 40.0,
-              ),
-              Text(
-                "Choose all available: ",
-                style: TextStyle(fontSize: 20.0),
-              ),
-              SizedBox(
-                height: 20.0,
-              ),
-              DaySelector(
-                  value: null,
-                  onChange: (value) {
-                    selectedChoices.contains(value.toString())
-                        ? selectedChoices.remove(value.toString())
-                        : selectedChoices.add(value.toString());
-
-                  },
-                  mode: DaySelector.modeFull),
-              SizedBox(
-                height: 80.0,
-              ),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                Text(
-                  "From ",
-                  style: TextStyle(fontSize: 20.0),
-                ),
-                FlatButton(
-                    child: Text(_time.format(context),
-                        style: TextStyle(fontSize: 20.0)),
-                    onPressed: () {
-                      _selectTime(context);
-                    }),
-              ]),
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-                Text(
-                  "To ",
-                  style: TextStyle(fontSize: 20.0),
-                ),
-                FlatButton(
-                    child: Text(_time2.format(context),
-                        style: TextStyle(fontSize: 20.0)),
-                    onPressed: () {
-                      _selectTime2(context);
-                    }),
-              ]),
-              Expanded(child: Text('')),
-              Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
-                Expanded(child: Text('')),
-                CustomButtonSmall(
-                  text: 'Next',
-                  callback: () async {
-                    await handleNextButtonPress(1);
-                  },
-                )
-              ])
-            ])));
+          SizedBox(
+            height: 40.0,
+          ),
+          Text(
+            "Time Preferences",
+            style: TextStyle(fontSize: 40.0),
+          ),
+          SizedBox(
+            height: 40.0,
+          ),
+          Text(
+            "Choose all available: ",
+            style: TextStyle(fontSize: 20.0),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          DaySelector(
+              value: null,
+              onChange: (value) {
+                selectedChoices.contains(value.toString())
+                    ? selectedChoices.remove(value.toString())
+                    : selectedChoices.add(value.toString());
+              },
+              mode: DaySelector.modeFull),
+          SizedBox(
+            height: 80.0,
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            Text(
+              "From ",
+              style: TextStyle(fontSize: 20.0),
+            ),
+            FlatButton(
+                child: Text(_time.format(context),
+                    style: TextStyle(fontSize: 20.0)),
+                onPressed: () {
+                  _selectTime(context);
+                }),
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            Text(
+              "To ",
+              style: TextStyle(fontSize: 20.0),
+            ),
+            FlatButton(
+                child: Text(_time2.format(context),
+                    style: TextStyle(fontSize: 20.0)),
+                onPressed: () {
+                  _selectTime2(context);
+                }),
+          ]),
+          Expanded(child: Text('')),
+          Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
+            Expanded(child: Text('')),
+            CustomButtonSmall(
+              text: 'Next',
+              callback: () async {
+                await handleNextButtonPress(1);
+              },
+            )
+          ])
+        ])));
   }
 }

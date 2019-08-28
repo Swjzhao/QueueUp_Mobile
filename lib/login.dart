@@ -107,39 +107,14 @@ class LoginScreenState extends State<LoginScreen> {
           .where('id', isEqualTo: firebaseUser.uid)
           .getDocuments();
       final List<DocumentSnapshot> documents2 = result2.documents;
-      if (documents.length == 0) {
-        // Update data to server if new user
-        Firestore.instance
-            .collection('users')
-            .document(firebaseUser.uid)
-            .setData({
-          'username': firebaseUser.displayName,
-          'photoUrl': firebaseUser.photoUrl,
-          'id': firebaseUser.uid,
-          'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-          'chattingWith': null,
-          'status': "Online"
-        });
 
-        // Write data to local
-        currentUser = firebaseUser;
-        await prefs.setString('id', currentUser.uid);
-        await prefs.setString('username', currentUser.displayName);
-        await prefs.setString('photoUrl', currentUser.photoUrl);
-        List<String> swipedIds = new List();
-        swipedIds.add(firebaseUser.uid);
-        Firestore.instance
-            .collection('swipes')
-            .document(firebaseUser.uid)
-            .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
-        await prefs.setStringList('swipedIds', swipedIds);
-      } else {
         // Write data to local
         await prefs.setString('id', documents[0]['id']);
         await prefs.setString('username', documents[0]['username']);
         await prefs.setString('photoUrl', documents[0]['photoUrl']);
         await prefs.setString('aboutMe', documents[0]['aboutMe']);
         await prefs.setString('photoUrl', documents[0]['status']);
+      await prefs.setString('countryCode', documents[0]['countryCode']);
         if (documents2.length == 0) {
           List<String> swipedIds = new List();
           swipedIds.add(firebaseUser.uid);
@@ -149,9 +124,10 @@ class LoginScreenState extends State<LoginScreen> {
               .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
           await prefs.setStringList('swipedIds', swipedIds);
         } else {
-          await prefs.setStringList('swipedIds', documents2[0]['swipedIds']);
+          List<dynamic> swipedIds = documents2[0]['swipedIds'];
+          await prefs.setStringList('swipedIds', swipedIds.cast<String>().toList());
         }
-      }
+
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
         isLoading = false;
