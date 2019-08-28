@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:queueup_mobileapp/const.dart';
 import 'package:flutter/material.dart';
+import 'package:queueup_mobileapp/const.dart';
 
 Positioned profileCard(
     String photoUrl,
@@ -78,32 +79,61 @@ Positioned profileCard(
                     borderRadius: new BorderRadius.circular(8.0),
                   ),
                   child: new Column(
-
                     children: <Widget>[
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Material(
-                        child: CachedNetworkImage(
-                          placeholder: (context, url) => Container(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(themeColor),
-                            ),
-                            width: 90.0,
-                            height: 90.0,
-                            padding: EdgeInsets.all(20.0),
-                          ),
-                          imageUrl: photoUrl,
-                          width: 90.0,
-                          height: 90.0,
-                          fit: BoxFit.cover,
+                      Row(children: <Widget>[
+                        Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Material(
+                                child: CachedNetworkImage(
+                                  placeholder: (context, url) => Container(
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.0,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          themeColor),
+                                    ),
+                                    width:
+                                        (screenSize.width / 1.2 + cardWidth) /
+                                            2,
+                                    height: (screenSize.height / 1.7) / 2,
+                                  ),
+                                  imageUrl: photoUrl,
+                                  width:
+                                      (screenSize.width / 1.2 + cardWidth) / 2,
+                                  height: (screenSize.height / 1.7) / 2,
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8.0),
+                                    topRight: Radius.circular(8.0)),
+                                clipBehavior: Clip.hardEdge,
+                              ),
+                            ]),
+                        SizedBox(
+                          height: 40.0,
                         ),
-                        borderRadius: BorderRadius.all(Radius.circular(45.0)),
-                        clipBehavior: Clip.hardEdge,
-                      ),
-
+                         ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minWidth:
+                                      (screenSize.width / 1.2 + cardWidth) / 2,
+                                  minHeight: (screenSize.height / 1.7) / 2,
+                                  maxWidth:
+                                      (screenSize.width / 1.2 + cardWidth) / 2,
+                                  maxHeight: (screenSize.height / 1.7) / 2,
+                                ),
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(username,
+                                          style: new TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 25.0)),
+                                      CustomLabel(games: games)
+                                    ]))
+                      ]),
+                      Expanded(child: Text('')),
                       new Container(
                           width: screenSize.width / 1.2 + cardWidth,
                           height:

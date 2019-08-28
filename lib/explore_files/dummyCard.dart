@@ -34,9 +34,7 @@ Positioned profileCardDummy(
         ),
         child: new Column(
           children: <Widget>[
-            SizedBox(
-              height: 5.0,
-            ),
+
             Material(
               child: CachedNetworkImage(
                 placeholder: (context, url) => Container(
@@ -45,16 +43,16 @@ Positioned profileCardDummy(
                     valueColor:
                     AlwaysStoppedAnimation<Color>(themeColor),
                   ),
-                  width: 90.0,
-                  height: 90.0,
-                  padding: EdgeInsets.all(20.0),
+                  width: screenSize.width / 1.2 + cardWidth,
+                  height: screenSize.height / 2.2 - 50.0,
+
                 ),
                 imageUrl: photoUrl,
-                width: 90.0,
-                height: 90.0,
+                width: screenSize.width / 1.2 + cardWidth,
+                height: screenSize.height / 2.2 - 50.0,
                 fit: BoxFit.cover,
               ),
-              borderRadius: BorderRadius.all(Radius.circular(45.0)),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0),topRight: Radius.circular(8.0)),
               clipBehavior: Clip.hardEdge,
             ),
             new Container(
