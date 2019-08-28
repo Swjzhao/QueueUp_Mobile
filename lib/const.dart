@@ -68,7 +68,7 @@ class CustomLabelState extends State<CustomLabel> {
     games.forEach((item) {
       widgets.add(
         Container(
-            margin: EdgeInsets.only(bottom: 15),
+            margin: EdgeInsets.only(bottom: 15, right: 10),
           child:Material(
               color: Colors.blueGrey,
               elevation: 6.0,
