@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:queueup_mobileapp/const.dart';
+import 'package:flutter/material.dart';
 
-Positioned cardDemoDummy(
-    DecorationImage img,
+Positioned profileCardDummy(
+    String photoUrl,
     double bottom,
     double right,
     double left,
@@ -29,15 +32,28 @@ Positioned cardDemoDummy(
         ),
         child: new Column(
           children: <Widget>[
-            new Container(
-              width: screenSize.width / 1.2 + cardWidth,
-              height: screenSize.height / 2.2,
-              decoration: new BoxDecoration(
-                borderRadius: new BorderRadius.only(
-                    topLeft: new Radius.circular(8.0),
-                    topRight: new Radius.circular(8.0)),
-                image: img,
+            SizedBox(
+              height: 5.0,
+            ),
+            Material(
+              child: CachedNetworkImage(
+                placeholder: (context, url) => Container(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                    valueColor:
+                    AlwaysStoppedAnimation<Color>(themeColor),
+                  ),
+                  width: 90.0,
+                  height: 90.0,
+                  padding: EdgeInsets.all(20.0),
+                ),
+                imageUrl: photoUrl,
+                width: 90.0,
+                height: 90.0,
+                fit: BoxFit.cover,
               ),
+              borderRadius: BorderRadius.all(Radius.circular(45.0)),
+              clipBehavior: Clip.hardEdge,
             ),
             new Container(
                 width: screenSize.width / 1.2 + cardWidth,

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:queueup_mobileapp/explore_files/dummyCard.dart';
 import 'package:queueup_mobileapp/explore_files/activeCard.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 //import 'package:animation_exp/PageReveal/page_main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -11,7 +13,8 @@ class ProfileCard extends StatefulWidget {
   ProfileCardState createState() => new ProfileCardState();
 }
 
-class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin {
+class ProfileCardState extends State<ProfileCard>
+    with TickerProviderStateMixin {
   AnimationController _buttonController;
   Animation<double> rotate;
   Animation<double> right;
@@ -19,11 +22,40 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
   Animation<double> width;
   int flag = 0;
 
-  List data = imageData;
+  final Firestore _firestore = Firestore.instance;
+
+  List data;
   List selectedData = [];
+  String id = '';
+  bool isLoading = true;
+  SharedPreferences prefs;
+  int dataLengthRef = 0;
+  List<DocumentSnapshot> docs;
+  Future<void> readLocal() async {
+    prefs = await SharedPreferences.getInstance();
+    id = prefs.getString('id') ?? '';
+    this.setState(() {
+      isLoading = true;
+    });
+    QuerySnapshot querySnapshot =
+    await Firestore.instance
+        .collection("users")
+        .getDocuments();
+    docs = querySnapshot.documents;
+    dataLengthRef = docs.length;
+    await Firestore.instance
+        .collection("users")
+        .getDocuments()
+        .then((data) {
+      this.setState(() {
+        isLoading = false;
+      });
+    });
+  }
+
   void initState() {
     super.initState();
-
+    readLocal();
     _buttonController = new AnimationController(
         duration: new Duration(milliseconds: 1000), vsync: this);
 
@@ -39,9 +71,8 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
     rotate.addListener(() {
       setState(() {
         if (rotate.isCompleted) {
-          var i = data.removeLast();
-          data.insert(0, i);
-
+          //var i = data.removeLast();
+          //data.insert(0, i);
           _buttonController.reset();
         }
       });
@@ -88,17 +119,27 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
     } on TickerCanceled {}
   }
 
-  dismissImg(DecorationImage img) {
+//  dismissImg(DecorationImage img) {
+////    setState(() {
+////      data.remove(img);
+////    });
+//  }
+//
+//  addImg(DecorationImage img) {
+////    setState(() {
+////      data.remove(img);
+////      selectedData.add(img);
+////    });
+//  }
+  addImg() {
     setState(() {
-      data.remove(img);
+      docs.removeLast();
     });
   }
-
-  addImg(DecorationImage img) {
-    setState(() {
-      data.remove(img);
-      selectedData.add(img);
-    });
+  dismissImg() {
+   setState(() {
+     docs.removeLast();
+   });
   }
 
   swipeRight() {
@@ -107,6 +148,7 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
         flag = 1;
       });
     _swipeAnimation();
+
   }
 
   swipeLeft() {
@@ -119,16 +161,21 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    timeDilation = 0.4;
 
-    double initialBottom = 15.0;
-    var dataLength = data.length;
-    double backCardPosition = initialBottom + (dataLength - 1) * 10 + 10;
-    double backCardWidth = -10.0;
-    return (new Scaffold(
+    if(isLoading) {
+      return new Container();
+    }else {
+      timeDilation = 0.4;
+      var dataLength = dataLengthRef;
+      double initialBottom = 15.0;
+      double backCardPosition = initialBottom + (dataLengthRef - 1) * 10 + 10;
+      double backCardWidth = -10.0;
+      return (new Scaffold(
         appBar: new AppBar(
           elevation: 0.0,
-          backgroundColor: ThemeData.dark().scaffoldBackgroundColor,
+          backgroundColor: ThemeData
+              .dark()
+              .scaffoldBackgroundColor,
           leading: new Container(),
           actions: <Widget>[
             new GestureDetector(
@@ -139,7 +186,8 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
                 //         builder: (context) => new PageMain()));
               },
               child: new Container(
-                margin: const EdgeInsets.only(bottom:15.0, top:15.0, left:15.0),
+                margin:
+                const EdgeInsets.only(bottom: 15.0, top: 15.0, left: 15.0),
                 child: new Icon(
                   Icons.equalizer,
                   color: Colors.cyan,
@@ -156,15 +204,70 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
                 dataLength.toString(),
                 style: new TextStyle(fontSize: 10.0),
               ),
-              decoration: new BoxDecoration(
-                  color: Colors.red, shape: BoxShape.circle),
+              decoration:
+              new BoxDecoration(color: Colors.red, shape: BoxShape.circle),
             )
           ],
         ),
         body: new Container(
-
           alignment: Alignment.center,
-          child: dataLength > 0
+          child: docs != null
+              ? Stack(
+              alignment: AlignmentDirectional.center,
+              children: docs.map((item) {
+                if (docs.indexOf(item) == dataLength - 1) {
+                  return profileCard(
+                      item.data['photoUrl'],
+                      bottom.value,
+                      right.value,
+                      0.0,
+                      backCardWidth + 10,
+                      rotate.value,
+                      rotate.value < -10 ? 0.1 : 0.0,
+                      context,
+                      dismissImg,
+                      flag,
+                      addImg,
+                      swipeRight,
+                      swipeLeft);
+                } else {
+                  backCardPosition = backCardPosition - 10;
+                  backCardWidth = backCardWidth + 10;
+
+                  return profileCardDummy(
+                      item.data['photoUrl'],
+                      backCardPosition,
+                      0.0,
+                      0.0,
+                      backCardWidth,
+                      0.0,
+                      0.0,
+                      context);
+                }
+              }).toList())
+              : new Text("No Profiles Left",
+              style:
+              new TextStyle(color: Colors.white, fontSize: 50.0)),
+        ),
+      ));
+    }
+  }
+}
+
+/*
+  StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('games').snapshots(),
+                builder: (context, snapshot) {
+                  List<DocumentSnapshot> docs = snapshot.data.documents;
+                  List<String> reportList = [];
+                  docs.map((doc) => reportList.add(doc.data['game'])).toList();
+                  reportList.add("Other");
+                  return MultiSelectChip(reportList);
+                }),
+ */
+
+/*
+dataLength > 0
               ? new Stack(
                   alignment: AlignmentDirectional.center,
                   children: data.map((item) {
@@ -192,7 +295,5 @@ class ProfileCardState extends State<ProfileCard> with TickerProviderStateMixin 
                     }
                   }).toList())
               : new Text("No Event Left",
-                  style: new TextStyle(color: Colors.white, fontSize: 50.0)),
-        )));
-  }
-}
+                  style: new TextStyle(color: Colors.white, fontSize: 50.0))
+ */

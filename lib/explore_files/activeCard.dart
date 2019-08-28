@@ -1,10 +1,13 @@
 import 'dart:math';
+import 'dart:async';
+import 'dart:io';
 
-import 'package:queueup_mobileapp/explore_files/detail.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:queueup_mobileapp/const.dart';
 import 'package:flutter/material.dart';
 
-Positioned cardDemo(
-    DecorationImage img,
+Positioned profileCard(
+    String photoUrl,
     double bottom,
     double right,
     double left,
@@ -35,11 +38,11 @@ Positioned cardDemo(
         // });
       },
       onDismissed: (DismissDirection direction) {
-//          _swipeAnimation();
+        //   _swipeAnimation();
         if (direction == DismissDirection.endToStart)
-          dismissImg(img);
+          dismissImg();
         else
-          addImg(img);
+          addImg();
       },
       child: new Transform(
         alignment: flag == 0 ? Alignment.bottomRight : Alignment.bottomLeft,
@@ -57,9 +60,9 @@ Positioned cardDemo(
                 //     context,
                 //     new MaterialPageRoute(
                 //         builder: (context) => new DetailPage(type: img)));
-                Navigator.of(context).push(new PageRouteBuilder(
-                      pageBuilder: (_, __, ___) => new DetailPage(type: img),
-                    ));
+//                Navigator.of(context).push(new PageRouteBuilder(
+//                      pageBuilder: (_, __, ___) => new DetailPage(type: img),
+//                    ));
               },
               child: new Card(
                 color: Colors.transparent,
@@ -73,17 +76,32 @@ Positioned cardDemo(
                     borderRadius: new BorderRadius.circular(8.0),
                   ),
                   child: new Column(
+
                     children: <Widget>[
-                      new Container(
-                        width: screenSize.width / 1.2 + cardWidth,
-                        height: screenSize.height / 2.2,
-                        decoration: new BoxDecoration(
-                          borderRadius: new BorderRadius.only(
-                              topLeft: new Radius.circular(8.0),
-                              topRight: new Radius.circular(8.0)),
-                          image: img,
-                        ),
+                      SizedBox(
+                        height: 20.0,
                       ),
+                      Material(
+                        child: CachedNetworkImage(
+                          placeholder: (context, url) => Container(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(themeColor),
+                            ),
+                            width: 90.0,
+                            height: 90.0,
+                            padding: EdgeInsets.all(20.0),
+                          ),
+                          imageUrl: photoUrl,
+                          width: 90.0,
+                          height: 90.0,
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                        clipBehavior: Clip.hardEdge,
+                      ),
+
                       new Container(
                           width: screenSize.width / 1.2 + cardWidth,
                           height:
@@ -127,9 +145,9 @@ Positioned cardDemo(
                                           new BorderRadius.circular(60.0),
                                     ),
                                     child: new Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 30.0,
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 30.0,
                                     ),
                                   ))
                             ],

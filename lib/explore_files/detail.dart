@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-
+/*
 class DetailPage extends StatefulWidget {
   final DecorationImage type;
   const DetailPage({Key key, this.type}) : super(key: key);
@@ -297,3 +297,4 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
     );
   }
 }
+*/

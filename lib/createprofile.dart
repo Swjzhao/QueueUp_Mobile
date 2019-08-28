@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:queueup_mobileapp/main.dart';
+import 'package:day_selector/day_selector.dart';
 
 class _PageSelector extends StatelessWidget {
   const _PageSelector();
@@ -426,21 +427,20 @@ class CreateProfile2State extends State<CreateProfile2> {
   }
 }
 
+
 class CreateProfile3 extends StatefulWidget {
-  static const String id = "CREATEPROFILE3";
+  static const String id = "CREATEPROFILE4";
 
   final String currentUserId;
 
-  CreateProfile3({Key key,  @required this.currentUserId})
-      : super(key: key);
+  CreateProfile3({Key key, @required this.currentUserId}) : super(key: key);
 
   @override
-  State createState() =>
-      new CreateProfile3State( currentUserId: currentUserId);
+  State createState() => new CreateProfile3State(currentUserId: currentUserId);
 }
 
 class CreateProfile3State extends State<CreateProfile3> {
-  CreateProfile3State({Key key,  @required this.currentUserId});
+  CreateProfile3State({Key key, @required this.currentUserId});
   String currentUserId;
 
   SharedPreferences prefs;
