@@ -10,6 +10,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:queueup_mobileapp/MultiSelectClip.dart';
+import 'package:day_selector/day_selector.dart';
 
 class Settings extends StatelessWidget {
   @override
@@ -55,6 +56,9 @@ class SettingsScreenState extends State<SettingsScreen> {
   double sliderVal1 = 2;
   double sliderVal2 = 2;
   String dropdownValue = 'Male';
+  List<String> selectedChoices = List();
+  TimeOfDay _time = new TimeOfDay.now();
+  TimeOfDay _time2 = new TimeOfDay.now();
 
   final Firestore _firestore = Firestore.instance;
   bool isLoading = false;
@@ -78,6 +82,18 @@ class SettingsScreenState extends State<SettingsScreen> {
     sliderVal1 = prefs.getDouble('seriousiness');
     sliderVal2 = prefs.getDouble('playerType');
     dropdownValue = prefs.getString('gender');
+
+
+    String strTime1 = prefs.getString('timeStart');
+    String strTime2 = prefs.getString('timeEnd');
+    List<String> time1s = strTime1.split(':');
+    List<String> time2s = strTime2.split(':');
+    _time =
+        new TimeOfDay(hour: int.parse(time1s[0]), minute: int.parse(time1s[1]));
+    _time2 =
+        new TimeOfDay(hour: int.parse(time2s[0]), minute: int.parse(time2s[1]));
+
+    await prefs.setStringList('daysAvailable', selectedChoices);
 
     controllerUsername = new TextEditingController(text: username);
     controllerAboutMe = new TextEditingController(text: aboutMe);
@@ -151,22 +167,36 @@ class SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       isLoading = true;
     });
-
+    String timeStart = _time.hour.toString() +
+        ":" +
+        _time.minute.toString() +
+        ":" +
+        _time.hourOfPeriod.toString();
+    String timeEnd = _time2.hour.toString() +
+        ":" +
+        _time2.minute.toString() +
+        ":" +
+        _time2.hourOfPeriod.toString();
     Firestore.instance.collection('users').document(id).updateData({
       'username': username,
       'aboutMe': aboutMe,
       'photoUrl': photoUrl,
       'seriousiness': sliderVal1,
-      'playerType':sliderVal2,
-      'gender':dropdownValue
-
+      'playerType': sliderVal2,
+      'gender': dropdownValue,
+      'timeStart': timeStart,
+      'timeEnd': timeEnd,
+      'daysAvailable': selectedChoices
     }).then((data) async {
       await prefs.setString('username', username);
       await prefs.setString('aboutMe', aboutMe);
       await prefs.setString('photoUrl', photoUrl);
-      await prefs.setDouble('seriousiness',sliderVal1);
+      await prefs.setDouble('seriousiness', sliderVal1);
       await prefs.setDouble('playerType', sliderVal2);
       await prefs.setString('gender', dropdownValue);
+      await prefs.setString('timeStart', timeStart);
+      await prefs.setString('timeEnd', timeEnd);
+      await prefs.setStringList('daysAvailable', selectedChoices);
       setState(() {
         isLoading = false;
       });
@@ -179,6 +209,26 @@ class SettingsScreenState extends State<SettingsScreen> {
 
       Fluttertoast.showToast(msg: err.toString());
     });
+  }
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay picked =
+        await showTimePicker(context: context, initialTime: _time);
+    if (picked != null) {
+      setState(() {
+        _time = picked;
+      });
+    }
+  }
+
+  Future<Null> _selectTime2(BuildContext context) async {
+    final TimeOfDay picked =
+        await showTimePicker(context: context, initialTime: _time2);
+    if (picked != null) {
+      setState(() {
+        _time2 = picked;
+      });
+    }
   }
 
   @override
@@ -360,6 +410,48 @@ class SettingsScreenState extends State<SettingsScreen> {
                   onChanged: (double value) {
                     setState(() => sliderVal2 = value);
                   }),
+              SizedBox(
+                height: 20.0,
+              ),
+              DaySelector(
+                  value: null,
+                  onChange: (value) {
+                    selectedChoices.contains(value.toString())
+                        ? selectedChoices.remove(value.toString())
+                        : selectedChoices.add(value.toString());
+                  },
+                  mode: DaySelector.modeFull),
+              SizedBox(
+                height: 80.0,
+              ),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "From ",
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                    FlatButton(
+                        child: Text(_time.format(context),
+                            style: TextStyle(fontSize: 20.0)),
+                        onPressed: () {
+                          _selectTime(context);
+                        }),
+                  ]),
+              Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      "To ",
+                      style: TextStyle(fontSize: 20.0),
+                    ),
+                    FlatButton(
+                        child: Text(_time2.format(context),
+                            style: TextStyle(fontSize: 20.0)),
+                        onPressed: () {
+                          _selectTime2(context);
+                        }),
+                  ]),
               // Button
               Container(
                 child: FlatButton(

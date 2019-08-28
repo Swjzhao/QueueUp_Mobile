@@ -12,6 +12,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:queueup_mobileapp/main.dart';
 import 'package:day_selector/day_selector.dart';
+import 'package:intl/intl.dart';
 
 class _PageSelector extends StatelessWidget {
   const _PageSelector();
@@ -37,7 +38,8 @@ class _PageSelector extends StatelessWidget {
                 children: <Widget>[
                   CreateProfile1(context: context, currentUserId: null),
                   CreateProfile2(context: context, currentUserId: null),
-                  CreateProfile3(currentUserId: null),
+                  CreateProfile3(bcontext: context, currentUserId: null),
+                  CreateProfile4(currentUserId: null),
                 ],
               ),
             ),
@@ -100,7 +102,7 @@ class CreateProfileState extends State<CreateProfile> {
     final Color color = Theme.of(context).accentColor;
     return Scaffold(
       body: DefaultTabController(
-          length: 3,
+          length: 4,
           child: Builder(
             builder: (BuildContext context) => Padding(
               padding: const EdgeInsets.all(8.0),
@@ -114,7 +116,9 @@ class CreateProfileState extends State<CreateProfile> {
                             context: context, currentUserId: currentUserId),
                         CreateProfile2(
                             context: context, currentUserId: currentUserId),
-                        CreateProfile3(currentUserId: currentUserId),
+                        CreateProfile3(
+                            bcontext: context, currentUserId: currentUserId),
+                        CreateProfile4(currentUserId: currentUserId),
                       ],
                     ),
                   ),
@@ -208,7 +212,7 @@ class CreateProfile1State extends State<CreateProfile1> {
       });
       final TabController controller = DefaultTabController.of(context);
       if (!controller.indexIsChanging)
-        controller.animateTo((controller.index + delta).clamp(0, 2));
+        controller.animateTo((controller.index + delta).clamp(0, 3));
     }).catchError((err) {
       setState(() {
         isLoading = false;
@@ -364,7 +368,7 @@ class CreateProfile2State extends State<CreateProfile2> {
       });
       final TabController controller = DefaultTabController.of(context);
       if (!controller.indexIsChanging)
-        controller.animateTo((controller.index + delta).clamp(0, 2));
+        controller.animateTo((controller.index + delta).clamp(0, 3));
     }).catchError((err) {
       setState(() {
         isLoading = false;
@@ -427,20 +431,191 @@ class CreateProfile2State extends State<CreateProfile2> {
   }
 }
 
-
 class CreateProfile3 extends StatefulWidget {
+  static const String id = "CREATEPROFILE3";
+
+  final String currentUserId;
+
+  final BuildContext bcontext;
+
+  CreateProfile3({Key key, this.bcontext, @required this.currentUserId})
+      : super(key: key);
+
+  @override
+  State createState() =>
+      new CreateProfile3State(bcontext: bcontext, currentUserId: currentUserId);
+}
+
+class CreateProfile3State extends State<CreateProfile3> {
+  CreateProfile3State(
+      {Key key, @required this.bcontext, @required this.currentUserId});
+  BuildContext bcontext;
+  final Firestore _firestore = Firestore.instance;
+  // 3 7 15 31 63 127 255
+  String currentUserId;
+  bool isLoading = false;
+  SharedPreferences prefs;
+  List<String> selectedChoices = List();
+  String id = '';
+
+  TimeOfDay _time = new TimeOfDay.now();
+  TimeOfDay _time2 = new TimeOfDay.now();
+  @override
+  void initState() {
+    super.initState();
+    readLocal();
+  }
+
+  void readLocal() async {
+    prefs = await SharedPreferences.getInstance();
+    id = prefs.getString('id') ?? '';
+    // Force refresh input
+    setState(() {});
+  }
+
+  Future<Null> handleNextButtonPress(int delta) async {
+    setState(() {
+      isLoading = true;
+    });
+    String timeStart = _time.hour.toString() +
+        ":" +
+        _time.minute.toString() +
+        ":" +
+        _time.hourOfPeriod.toString();
+    String timeEnd = _time2.hour.toString() +
+        ":" +
+        _time2.minute.toString() +
+        ":" +
+        _time2.hourOfPeriod.toString();
+    Firestore.instance.collection('users').document(id).updateData({
+      'timeStart': timeStart,
+      'timeEnd': timeEnd,
+      'daysAvailable': selectedChoices
+    }).then((data) async {
+      await prefs.setString('timeStart', timeStart);
+      await prefs.setString('timeEnd', timeEnd);
+      await prefs.setStringList('daysAvailable', selectedChoices);
+      setState(() {
+        isLoading = false;
+      });
+      final TabController controller = DefaultTabController.of(context);
+      if (!controller.indexIsChanging)
+        controller.animateTo((controller.index + delta).clamp(0, 3));
+    }).catchError((err) {
+      setState(() {
+        isLoading = false;
+      });
+
+      Fluttertoast.showToast(msg: err.toString());
+    });
+  }
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay picked =
+        await showTimePicker(context: context, initialTime: _time);
+    if (picked != null) {
+      setState(() {
+        _time = picked;
+      });
+    }
+  }
+
+  Future<Null> _selectTime2(BuildContext context) async {
+    final TimeOfDay picked =
+        await showTimePicker(context: context, initialTime: _time2);
+    if (picked != null) {
+      setState(() {
+        _time2 = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+        child: SafeArea(
+            child: Column(children: <Widget>[
+          SizedBox(
+            height: 40.0,
+          ),
+          Text(
+            "Time Preferences",
+            style: TextStyle(fontSize: 40.0),
+          ),
+          SizedBox(
+            height: 40.0,
+          ),
+          Text(
+            "Choose all available: ",
+            style: TextStyle(fontSize: 20.0),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          DaySelector(
+              value: null,
+              onChange: (value) {
+                  selectedChoices.contains(value.toString())
+                      ? selectedChoices.remove(value.toString())
+                      : selectedChoices.add(value.toString());
+
+              },
+              mode: DaySelector.modeFull),
+          SizedBox(
+            height: 80.0,
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            Text(
+              "From ",
+              style: TextStyle(fontSize: 20.0),
+            ),
+            FlatButton(
+                child: Text(_time.format(context),
+                    style: TextStyle(fontSize: 20.0)),
+                onPressed: () {
+                  _selectTime(context);
+                }),
+          ]),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            Text(
+              "To ",
+              style: TextStyle(fontSize: 20.0),
+            ),
+            FlatButton(
+                child: Text(_time2.format(context),
+                    style: TextStyle(fontSize: 20.0)),
+                onPressed: () {
+                  _selectTime2(context);
+                }),
+          ]),
+          Expanded(child: Text('')),
+          Row(crossAxisAlignment: CrossAxisAlignment.end, children: <Widget>[
+            Expanded(child: Text('')),
+            CustomButtonSmall(
+              text: 'Next',
+              callback: () async {
+                await handleNextButtonPress(1);
+              },
+            )
+          ])
+        ])));
+  }
+}
+
+class CreateProfile4 extends StatefulWidget {
   static const String id = "CREATEPROFILE4";
 
   final String currentUserId;
 
-  CreateProfile3({Key key, @required this.currentUserId}) : super(key: key);
+  CreateProfile4({Key key, @required this.currentUserId}) : super(key: key);
 
   @override
-  State createState() => new CreateProfile3State(currentUserId: currentUserId);
+  State createState() => new CreateProfile4State(currentUserId: currentUserId);
 }
 
-class CreateProfile3State extends State<CreateProfile3> {
-  CreateProfile3State({Key key, @required this.currentUserId});
+class CreateProfile4State extends State<CreateProfile4> {
+  CreateProfile4State({Key key, @required this.currentUserId});
   String currentUserId;
 
   SharedPreferences prefs;
