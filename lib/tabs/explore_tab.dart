@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:queueup_mobileapp/explore_files/swipe.dart';
 
 class ExploreTab extends StatefulWidget {
   static const String id = "EXPLORE";
@@ -19,6 +20,6 @@ class ExploreTabState extends State<ExploreTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return ProfileCard();
   }
 }

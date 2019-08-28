@@ -255,7 +255,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
               text: "Chats",
             ),
             new Tab(
-              text: "Swipe",
+              text: "Explore",
             ),
           ],
         ),
