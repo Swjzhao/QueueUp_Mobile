@@ -45,7 +45,6 @@ class LoginScreenState extends State<LoginScreen> {
   bool isLoggedIn = false;
   FirebaseUser currentUser;
 
-
   bool usingGoogle = false;
   String email;
   String password;
@@ -54,7 +53,6 @@ class LoginScreenState extends State<LoginScreen> {
   TextEditingController controllerPassword;
   final FocusNode focusNodeEmail = new FocusNode();
   final FocusNode focusNodePassword = new FocusNode();
-
 
   @override
   void initState() {
@@ -104,6 +102,11 @@ class LoginScreenState extends State<LoginScreen> {
           .where('id', isEqualTo: firebaseUser.uid)
           .getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
+      final QuerySnapshot result2 = await Firestore.instance
+          .collection('swipes')
+          .where('id', isEqualTo: firebaseUser.uid)
+          .getDocuments();
+      final List<DocumentSnapshot> documents2 = result2.documents;
       if (documents.length == 0) {
         // Update data to server if new user
         Firestore.instance
@@ -123,16 +126,31 @@ class LoginScreenState extends State<LoginScreen> {
         await prefs.setString('id', currentUser.uid);
         await prefs.setString('username', currentUser.displayName);
         await prefs.setString('photoUrl', currentUser.photoUrl);
-        await prefs.setString('photoUrl', currentUser.photoUrl);
-
+        List<String> swipedIds = new List();
+        swipedIds.add(firebaseUser.uid);
+        Firestore.instance
+            .collection('swipes')
+            .document(firebaseUser.uid)
+            .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
+        await prefs.setStringList('swipedIds', swipedIds);
       } else {
         // Write data to local
         await prefs.setString('id', documents[0]['id']);
         await prefs.setString('username', documents[0]['username']);
         await prefs.setString('photoUrl', documents[0]['photoUrl']);
         await prefs.setString('aboutMe', documents[0]['aboutMe']);
-        await prefs.setString('photoUrl',documents[0]['status'] );
-
+        await prefs.setString('photoUrl', documents[0]['status']);
+        if (documents2.length == 0) {
+          List<String> swipedIds = new List();
+          swipedIds.add(firebaseUser.uid);
+          Firestore.instance
+              .collection('swipes')
+              .document(firebaseUser.uid)
+              .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
+          await prefs.setStringList('swipedIds', swipedIds);
+        } else {
+          await prefs.setStringList('swipedIds', documents2[0]['swipedIds']);
+        }
       }
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
@@ -184,6 +202,11 @@ class LoginScreenState extends State<LoginScreen> {
           .where('id', isEqualTo: firebaseUser.uid)
           .getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
+      final QuerySnapshot result2 = await Firestore.instance
+          .collection('swipes')
+          .where('id', isEqualTo: firebaseUser.uid)
+          .getDocuments();
+      final List<DocumentSnapshot> documents2 = result2.documents;
       if (documents.length == 0) {
         // Update data to server if new user
         Firestore.instance
@@ -202,12 +225,30 @@ class LoginScreenState extends State<LoginScreen> {
         await prefs.setString('id', currentUser.uid);
         await prefs.setString('username', currentUser.displayName);
         await prefs.setString('photoUrl', currentUser.photoUrl);
+        List<String> swipedIds = new List();
+        swipedIds.add(firebaseUser.uid);
+        Firestore.instance
+            .collection('swipes')
+            .document(firebaseUser.uid)
+            .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
+        await prefs.setStringList('swipedIds', swipedIds);
       } else {
         // Write data to local
         await prefs.setString('id', documents[0]['id']);
         await prefs.setString('username', documents[0]['username']);
         await prefs.setString('photoUrl', documents[0]['photoUrl']);
         await prefs.setString('aboutMe', documents[0]['aboutMe']);
+        if (documents2.length == 0) {
+          List<String> swipedIds = new List();
+          swipedIds.add(firebaseUser.uid);
+          Firestore.instance
+              .collection('swipes')
+              .document(firebaseUser.uid)
+              .setData({'id': firebaseUser.uid, 'swipedIds': swipedIds});
+          await prefs.setStringList('swipedIds', swipedIds);
+        } else {
+          await prefs.setStringList('swipedIds', documents2[0]['swipedIds']);
+        }
       }
       Fluttertoast.showToast(msg: "Sign in success");
       this.setState(() {
@@ -238,67 +279,71 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            "QueueUp",
-            style: TextStyle(fontSize: 40.0),
-          ),
-          SizedBox(
-            height: 40.0,
-          ),
-          TextField(
-            controller: controllerEmail,
-            focusNode: focusNodeEmail,
-            keyboardType: TextInputType.emailAddress,
-            onChanged: (value) => email = value,
-            decoration: InputDecoration(
-              hintText: "Enter Your Email...",
-              border: const OutlineInputBorder(),
+      body: Container(
+        padding: const EdgeInsets.only( left: 20.0, right: 20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "QueueUp",
+              style: TextStyle(fontSize: 40.0),
             ),
-          ),
-          SizedBox(
-            height: 40.0,
-          ),
-          TextField(
-            controller: controllerPassword,
-            focusNode: focusNodePassword,
-            autocorrect: false,
-            obscureText: true,
-            onChanged: (value) => password = value,
-            decoration: InputDecoration(
-              hintText: "Enter Your Password...",
-              border: const OutlineInputBorder(),
+            SizedBox(
+              height: 40.0,
             ),
-          ),
-          CustomButton(
-            text: "Log In",
-            callback: () async {
-              await loginUser();
-            },
-          ),
-          CustomButton(
-            text: "Create an Account",
-            callback: () {
-              Navigator.of(context).pushNamed(CreateAccount.id);
-            },
-          ),
-          SizedBox(
-            height: 40.0,
-          ),
-          FlatButton(
-              onPressed: handleSignIn,
-              child: Text(
-                'SIGN IN WITH GOOGLE',
-                style: TextStyle(fontSize: 16.0),
+            TextField(
+              controller: controllerEmail,
+              focusNode: focusNodeEmail,
+              keyboardType: TextInputType.emailAddress,
+              onChanged: (value) => email = value,
+              decoration: InputDecoration(
+                hintText: "Enter Your Email...",
               ),
-              color: Color(0xffdd4b39),
-              highlightColor: Color(0xffff7f7f),
-              splashColor: Colors.transparent,
-              textColor: Colors.white,
-              padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
-        ],
+            ),
+            SizedBox(
+              height: 40.0,
+            ),
+            TextField(
+              controller: controllerPassword,
+              focusNode: focusNodePassword,
+              autocorrect: false,
+              obscureText: true,
+              onChanged: (value) => password = value,
+              decoration: InputDecoration(
+                hintText: "Enter Your Password...",
+              ),
+            ),
+            SizedBox(
+              height: 40.0,
+            ),
+            CustomButton(
+              text: "Log In",
+              callback: () async {
+                await loginUser();
+              },
+            ),
+            CustomButton(
+              text: "Create an Account",
+              callback: () {
+                Navigator.of(context).pushNamed(CreateAccount.id);
+              },
+            ),
+            SizedBox(
+              height: 40.0,
+            ),
+            FlatButton(
+                onPressed: handleSignIn,
+                child: Text(
+                  'SIGN IN WITH GOOGLE',
+                  style: TextStyle(fontSize: 16.0),
+                ),
+                color: Color(0xffdd4b39),
+                highlightColor: Color(0xffff7f7f),
+                splashColor: Colors.transparent,
+                textColor: Colors.white,
+                padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)),
+          ],
+        ),
       ),
     );
   }

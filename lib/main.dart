@@ -244,7 +244,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         title: Text(
           'MAIN',
-          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         bottom: new TabBar(
           controller: _tabController,
@@ -271,14 +271,14 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                       children: <Widget>[
                         Icon(
                           choice.icon,
-                          color: primaryColor,
+                          color: Colors.white,
                         ),
                         Container(
                           width: 10.0,
                         ),
                         Text(
                           choice.title,
-                          style: TextStyle(color: primaryColor),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ],
                     ));

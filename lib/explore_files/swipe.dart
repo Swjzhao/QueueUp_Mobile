@@ -31,22 +31,26 @@ class ProfileCardState extends State<ProfileCard>
   SharedPreferences prefs;
   int dataLengthRef = 0;
   List<DocumentSnapshot> docs;
+  List<String> swipedIds = new List();
+
   Future<void> readLocal() async {
     prefs = await SharedPreferences.getInstance();
     id = prefs.getString('id') ?? '';
+    swipedIds = prefs.getStringList('swipedIds');
     this.setState(() {
       isLoading = true;
     });
     QuerySnapshot querySnapshot =
-    await Firestore.instance
-        .collection("users")
-        .getDocuments();
+        await Firestore.instance.collection("users").getDocuments();
     docs = querySnapshot.documents;
+    docs.map((item) {
+      print(item);
+      if (swipedIds.contains(item.data['id'])) {
+        docs.remove(item);
+      }
+    }).toList();
     dataLengthRef = docs.length;
-    await Firestore.instance
-        .collection("users")
-        .getDocuments()
-        .then((data) {
+    await Firestore.instance.collection("users").getDocuments().then((data) {
       this.setState(() {
         isLoading = false;
       });
@@ -119,27 +123,18 @@ class ProfileCardState extends State<ProfileCard>
     } on TickerCanceled {}
   }
 
-//  dismissImg(DecorationImage img) {
-////    setState(() {
-////      data.remove(img);
-////    });
-//  }
-//
-//  addImg(DecorationImage img) {
-////    setState(() {
-////      data.remove(img);
-////      selectedData.add(img);
-////    });
-//  }
   addImg() {
     setState(() {
       docs.removeLast();
+      isLoading = false;
     });
   }
+
   dismissImg() {
-   setState(() {
-     docs.removeLast();
-   });
+    setState(() {
+      docs.removeLast();
+      isLoading = false;
+    });
   }
 
   swipeRight() {
@@ -148,7 +143,6 @@ class ProfileCardState extends State<ProfileCard>
         flag = 1;
       });
     _swipeAnimation();
-
   }
 
   swipeLeft() {
@@ -161,21 +155,18 @@ class ProfileCardState extends State<ProfileCard>
 
   @override
   Widget build(BuildContext context) {
-
-    if(isLoading) {
+    if (isLoading) {
       return new Container();
-    }else {
+    } else {
       timeDilation = 0.4;
-      var dataLength = dataLengthRef;
+      var dataLength =   docs.length;
       double initialBottom = 15.0;
-      double backCardPosition = initialBottom + (dataLengthRef - 1) * 10 + 10;
+      double backCardPosition = initialBottom + (dataLength- 1) * 10 + 10;
       double backCardWidth = -10.0;
       return (new Scaffold(
         appBar: new AppBar(
           elevation: 0.0,
-          backgroundColor: ThemeData
-              .dark()
-              .scaffoldBackgroundColor,
+          backgroundColor: ThemeData.dark().scaffoldBackgroundColor,
           leading: new Container(),
           actions: <Widget>[
             new GestureDetector(
@@ -187,7 +178,7 @@ class ProfileCardState extends State<ProfileCard>
               },
               child: new Container(
                 margin:
-                const EdgeInsets.only(bottom: 15.0, top: 15.0, left: 15.0),
+                    const EdgeInsets.only(bottom: 15.0, top: 15.0, left: 15.0),
                 child: new Icon(
                   Icons.equalizer,
                   color: Colors.cyan,
@@ -205,7 +196,7 @@ class ProfileCardState extends State<ProfileCard>
                 style: new TextStyle(fontSize: 10.0),
               ),
               decoration:
-              new BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                  new BoxDecoration(color: Colors.red, shape: BoxShape.circle),
             )
           ],
         ),
@@ -213,41 +204,40 @@ class ProfileCardState extends State<ProfileCard>
           alignment: Alignment.center,
           child: docs != null
               ? Stack(
-              alignment: AlignmentDirectional.center,
-              children: docs.map((item) {
-                if (docs.indexOf(item) == dataLength - 1) {
-                  return profileCard(
-                      item.data['photoUrl'],
-                      bottom.value,
-                      right.value,
-                      0.0,
-                      backCardWidth + 10,
-                      rotate.value,
-                      rotate.value < -10 ? 0.1 : 0.0,
-                      context,
-                      dismissImg,
-                      flag,
-                      addImg,
-                      swipeRight,
-                      swipeLeft);
-                } else {
-                  backCardPosition = backCardPosition - 10;
-                  backCardWidth = backCardWidth + 10;
+                  alignment: AlignmentDirectional.center,
+                  children: docs.map((item) {
+                    if (docs.indexOf(item) == dataLength - 1) {
+                      return profileCard(
+                          item.data['photoUrl'],
+                          bottom.value,
+                          right.value,
+                          0.0,
+                          backCardWidth + 10,
+                          rotate.value,
+                          rotate.value < -10 ? 0.1 : 0.0,
+                          context,
+                          dismissImg,
+                          flag,
+                          addImg,
+                          swipeRight,
+                          swipeLeft);
+                    } else {
+                      backCardPosition = backCardPosition - 10;
+                      backCardWidth = backCardWidth + 10;
 
-                  return profileCardDummy(
-                      item.data['photoUrl'],
-                      backCardPosition,
-                      0.0,
-                      0.0,
-                      backCardWidth,
-                      0.0,
-                      0.0,
-                      context);
-                }
-              }).toList())
+                      return profileCardDummy(
+                          item.data['photoUrl'],
+                          backCardPosition,
+                          0.0,
+                          0.0,
+                          backCardWidth,
+                          0.0,
+                          0.0,
+                          context);
+                    }
+                  }).toList())
               : new Text("No Profiles Left",
-              style:
-              new TextStyle(color: Colors.white, fontSize: 50.0)),
+                  style: new TextStyle(color: Colors.white, fontSize: 50.0)),
         ),
       ));
     }

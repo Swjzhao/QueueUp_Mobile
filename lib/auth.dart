@@ -70,6 +70,8 @@ class _CreateAccountState extends State<CreateAccount> {
             .where('id', isEqualTo: firebaseUser.uid)
             .getDocuments();
         final List<DocumentSnapshot> documents = result.documents;
+        final QuerySnapshot result2 = await Firestore.instance.collection('swipes').where('id',isEqualTo: firebaseUser.uid).getDocuments();
+        final List<DocumentSnapshot> documents2 = result2.documents;
         if (documents.length == 0) {
           // Update data to server if new user
           Firestore.instance
@@ -84,19 +86,37 @@ class _CreateAccountState extends State<CreateAccount> {
             'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
             'chattingWith': null
           });
-
+          List<String> swipedIds = new List();
+          swipedIds.add(firebaseUser.uid);
+          Firestore.instance.collection('swipes').document(firebaseUser.uid).setData({
+            'id':firebaseUser.uid,
+            'swipedIds': swipedIds
+          });
+          await prefs.setStringList('swipedIds',swipedIds);
           // Write data to local
           currentUser = firebaseUser;
           await prefs.setString('id', currentUser.uid);
           await prefs.setString('username', "TempName");
           await prefs.setString('photoUrl',
               "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media");
+
         } else {
           // Write data to local
           await prefs.setString('id', documents[0]['id']);
           await prefs.setString('username', documents[0]['username']);
           await prefs.setString('photoUrl', documents[0]['photoUrl']);
           await prefs.setString('aboutMe', documents[0]['aboutMe']);
+          if(documents2.length == 0){
+            List<String> swipedIds = new List();
+            swipedIds.add(firebaseUser.uid);
+            Firestore.instance.collection('swipes').document(firebaseUser.uid).setData({
+              'id':firebaseUser.uid,
+              'swipedIds': swipedIds
+            });
+            await prefs.setStringList('swipedIds',swipedIds);
+          }else{
+            await prefs.setStringList('swipedIds',documents2[0]['swipedIds']);
+          }
         }
         Fluttertoast.showToast(msg: "Sign in success");
 
@@ -120,13 +140,15 @@ class _CreateAccountState extends State<CreateAccount> {
         title: Text("QueueUp"),
       ),
       body: Stack(
+
         children: <Widget>[
       SingleChildScrollView(
+        padding: const EdgeInsets.only( left: 30.0, right: 30.0),
       child:Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           SizedBox(
-            height: 40.0,
+            height: 80.0,
           ),
           TextField(
             controller: controllerEmail,
@@ -135,7 +157,7 @@ class _CreateAccountState extends State<CreateAccount> {
             onChanged: (value) => email = value,
             decoration: InputDecoration(
               hintText: "Enter Your Email...",
-              border: const OutlineInputBorder(),
+
             ),
           ),
           SizedBox(
@@ -149,7 +171,7 @@ class _CreateAccountState extends State<CreateAccount> {
             onChanged: (value) => password = value,
             decoration: InputDecoration(
               hintText: "Enter Your Password...",
-              border: const OutlineInputBorder(),
+
             ),
           ),
           SizedBox(
@@ -163,7 +185,7 @@ class _CreateAccountState extends State<CreateAccount> {
             onChanged: (value) => confirmpassword = value,
             decoration: InputDecoration(
               hintText: "Confirm Your Password...",
-              border: const OutlineInputBorder(),
+
             ),
           ),
           SizedBox(
@@ -175,7 +197,7 @@ class _CreateAccountState extends State<CreateAccount> {
             onChanged: (value) => username = value,
             decoration: InputDecoration(
               hintText: "Enter Your Username...",
-              border: const OutlineInputBorder(),
+
             ),
           ),
           SizedBox(
