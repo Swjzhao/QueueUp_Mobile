@@ -58,6 +58,28 @@ class LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     isSignedIn();
+    readGames();
+  }
+
+  Future<void> readGames() async {
+    final QuerySnapshot result3 =
+        await Firestore.instance.collection("games").getDocuments();
+    final List<DocumentSnapshot> gameCollections = result3.documents;
+
+    prefs = await SharedPreferences.getInstance();
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection("games").getDocuments();
+    List<DocumentSnapshot> docs = querySnapshot.documents;
+    List<String> gameNames = new List();
+    List<String> gameImageUrls = new List();
+    docs.map((item) {
+      gameNames.add(item.data['game']);
+      gameImageUrls.add(item.data['imageUrl']);
+    }).toList();
+
+    await prefs.setStringList('gameNames', gameNames);
+    await prefs.setStringList('gameImageUrls', gameImageUrls);
+    print(gameNames);
   }
 
   void isSignedIn() async {
@@ -126,7 +148,8 @@ class LoginScreenState extends State<LoginScreen> {
       List<dynamic> games = documents[0]['games'];
       await prefs.setStringList('games', games.cast<String>().toList());
       List<dynamic> daysAvailable = documents[0]['daysAvailable'];
-      await prefs.setStringList('daysAvailable', daysAvailable.cast<String>().toList());
+      await prefs.setStringList(
+          'daysAvailable', daysAvailable.cast<String>().toList());
 
       if (documents2.length == 0) {
         List<String> swipedIds = new List();
@@ -228,7 +251,8 @@ class LoginScreenState extends State<LoginScreen> {
         List<dynamic> games = documents[0]['games'];
         await prefs.setStringList('games', games.cast<String>().toList());
         List<dynamic> daysAvailable = documents[0]['daysAvailable'];
-        await prefs.setStringList('daysAvailable', daysAvailable.cast<String>().toList());
+        await prefs.setStringList(
+            'daysAvailable', daysAvailable.cast<String>().toList());
 
         List<String> swipedIds = new List();
         swipedIds.add(firebaseUser.uid);

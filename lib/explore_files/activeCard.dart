@@ -6,8 +6,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:queueup_mobileapp/const.dart';
 import 'package:flutter/material.dart';
 import 'package:queueup_mobileapp/const.dart';
+import 'package:queueup_mobileapp/explore_files/detail.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Positioned profileCard(
+    DocumentSnapshot snapsnot,
     String photoUrl,
     String username,
     List<String> games,
@@ -59,13 +62,9 @@ Positioned profileCard(
             tag: "img",
             child: new GestureDetector(
               onTap: () {
-                // Navigator.push(
-                //     context,
-                //     new MaterialPageRoute(
-                //         builder: (context) => new DetailPage(type: img)));
-//                Navigator.of(context).push(new PageRouteBuilder(
-//                      pageBuilder: (_, __, ___) => new DetailPage(type: img),
-//                    ));
+                Navigator.of(context).push(new PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => new DetailPage(snapshot: snapsnot),
+                ));
               },
               child: new Card(
                 color: Colors.transparent,

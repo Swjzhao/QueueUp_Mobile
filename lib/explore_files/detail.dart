@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-/*
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class DetailPage extends StatefulWidget {
-  final DecorationImage type;
-  const DetailPage({Key key, this.type}) : super(key: key);
+  final DocumentSnapshot snapshot;
+  const DetailPage({Key key, this. snapshot}) : super(key: key);
   @override
-  _DetailPageState createState() => new _DetailPageState(type: type);
+  _DetailPageState createState() => new _DetailPageState( snapshot: snapshot);
 }
 
 enum AppBarBehavior { normal, pinned, floating, snapping }
@@ -14,9 +15,9 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
   AnimationController _containerController;
   Animation<double> width;
   Animation<double> heigth;
-  DecorationImage type;
-  _DetailPageState({this.type});
-  List data = imageData;
+  DocumentSnapshot snapshot;
+  _DetailPageState({this.snapshot});
+
   double _appBarHeight = 256.0;
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
@@ -59,18 +60,14 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     timeDilation = 0.7;
-    int img = data.indexOf(type);
+
     //print("detail");
     return new Theme(
-      data: new ThemeData(
-        brightness: Brightness.light,
-        primaryColor: const Color.fromRGBO(106, 94, 175, 1.0),
-        platform: Theme.of(context).platform,
-      ),
+      data: ThemeData.dark(),
       child: new Container(
         width: width.value,
         height: heigth.value,
-        color: const Color.fromRGBO(106, 94, 175, 1.0),
+        color: ThemeData.dark().scaffoldBackgroundColor,
         child: new Hero(
           tag: "img",
           child: new Card(
@@ -108,7 +105,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                             _appBarBehavior == AppBarBehavior.snapping,
                         snap: _appBarBehavior == AppBarBehavior.snapping,
                         flexibleSpace: new FlexibleSpaceBar(
-                          title: new Text("Party"),
+                          title: new Text(snapshot.data['username']),
                           background: new Stack(
                             fit: StackFit.expand,
                             children: <Widget>[
@@ -116,7 +113,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                 width: width.value,
                                 height: _appBarHeight,
                                 decoration: new BoxDecoration(
-                                  image: data[img],
+                                  image: null,
                                 ),
                               ),
                             ],
@@ -153,7 +150,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                             new Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
-                                              child: new Text("10:00  AM"),
+                                              child: new Text("10:00  AM", style: TextStyle(color: Colors.black),),
                                             )
                                           ],
                                         ),
@@ -194,44 +191,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                                         border: new Border(
                                             top: new BorderSide(
                                                 color: Colors.black12))),
-                                    child: new Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        new Text(
-                                          "ATTENDEES",
-                                          style: new TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                        new Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            new CircleAvatar(
-                                                backgroundImage: avatar1),
-                                            new CircleAvatar(
-                                              backgroundImage: avatar2,
-                                            ),
-                                            new CircleAvatar(
-                                              backgroundImage: avatar3,
-                                            ),
-                                            new CircleAvatar(
-                                              backgroundImage: avatar4,
-                                            ),
-                                            new CircleAvatar(
-                                              backgroundImage: avatar5,
-                                            ),
-                                            new CircleAvatar(
-                                              backgroundImage: avatar6,
-                                            )
-                                          ],
-                                        )
-                                      ],
-                                    ),
+
                                   ),
                                   new Container(
                                     height: 100.0,
@@ -248,7 +208,7 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                       width: 600.0,
                       height: 80.0,
                       decoration: new BoxDecoration(
-                        color: new Color.fromRGBO(121, 114, 173, 1.0),
+                        color: ThemeData.dark().scaffoldBackgroundColor,
                       ),
                       alignment: Alignment.center,
                       child: new Row(
@@ -256,34 +216,42 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
                         children: <Widget>[
                           new FlatButton(
                               padding: new EdgeInsets.all(0.0),
-                              onPressed: () {},
+                              onPressed: () {
+
+                              },
                               child: new Container(
                                 height: 60.0,
-                                width: 130.0,
+                                width: 120.0,
                                 alignment: Alignment.center,
                                 decoration: new BoxDecoration(
                                   color: Colors.red,
-                                  borderRadius: new BorderRadius.circular(60.0),
+                                  borderRadius:
+                                  new BorderRadius.circular(60.0),
                                 ),
-                                child: new Text(
-                                  "DON'T",
-                                  style: new TextStyle(color: Colors.white),
+                                child: new Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 30.0,
                                 ),
                               )),
                           new FlatButton(
                               padding: new EdgeInsets.all(0.0),
-                              onPressed: () {},
+                              onPressed: () {
+
+                              },
                               child: new Container(
                                 height: 60.0,
-                                width: 130.0,
+                                width: 120.0,
                                 alignment: Alignment.center,
                                 decoration: new BoxDecoration(
                                   color: Colors.cyan,
-                                  borderRadius: new BorderRadius.circular(60.0),
+                                  borderRadius:
+                                  new BorderRadius.circular(60.0),
                                 ),
-                                child: new Text(
-                                  "I'M IN",
-                                  style: new TextStyle(color: Colors.white),
+                                child: new Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 30.0,
                                 ),
                               ))
                         ],
@@ -297,4 +265,3 @@ class _DetailPageState extends State<DetailPage> with TickerProviderStateMixin {
     );
   }
 }
-*/

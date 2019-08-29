@@ -14,6 +14,7 @@ import 'package:queueup_mobileapp/settings.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:queueup_mobileapp/tabs/chat_tab.dart';
 import 'package:queueup_mobileapp/tabs/explore_tab.dart';
@@ -39,6 +40,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       new FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
   TabController _tabController;
+  SharedPreferences prefs;
 
   bool isLoading = false;
   bool isUsingGoogle = false;
@@ -47,9 +49,18 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     const Choice(title: 'Log out', icon: Icons.exit_to_app),
   ];
 
+  Future<void> readLocal() async {
+    prefs = await SharedPreferences.getInstance();
+    this.setState(() {
+      isLoading = true;
+    });
+
+  }
+
   @override
   void initState() {
     super.initState();
+    readLocal();
     registerNotification();
     configLocalNotification();
     checkIsUsingGoogle();
@@ -106,9 +117,7 @@ class MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   void showNotification(message) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
-      Platform.isAndroid
-          ? 'com.queueupgames.queueup_mobileapp'
-          : '',
+      Platform.isAndroid ? 'com.queueupgames.queueup_mobileapp' : '',
       'QueueUp',
       'your channel description',
       playSound: true,

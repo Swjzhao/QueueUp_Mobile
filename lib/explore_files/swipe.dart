@@ -212,6 +212,7 @@ class ProfileCardState extends State<ProfileCard>
 
                     if (docs.indexOf(item) == dataLength - 1) {
                       return profileCard(
+                        item,
                           item.data['photoUrl'],
                           item.data['username'],
                           games.cast<String>().toList(),
