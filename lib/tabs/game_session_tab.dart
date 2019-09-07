@@ -31,11 +31,11 @@ class GameSessionTabState extends State<GameSessionTab> {
       isLoading = true;
     });
     prefs = await SharedPreferences.getInstance();
-    QuerySnapshot querySnapshot = await Firestore.instance.collection("games").getDocuments();
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection("games").getDocuments();
     List<DocumentSnapshot> docs = querySnapshot.documents;
 
     await Firestore.instance.collection("games").getDocuments().then((data) {
-
       docs.map((item) {
         gameNames.add(item.data['game']);
         gameImageUrls.add(item.data['imageUrl']);
@@ -55,44 +55,44 @@ class GameSessionTabState extends State<GameSessionTab> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-   return Container();
+      return Container();
     } else {
       print(gameImageUrls);
       return Container(
-
           child: new GridView.builder(
-            itemCount: gameNames.length,
-            gridDelegate:
+        itemCount: gameNames.length,
+        gridDelegate:
             new SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-            itemBuilder: (BuildContext context, int index) {
-              return new Card(
-                child: new GridTile(
-                  footer: new Text(gameNames[index]),
-                  child: Material(
+        itemBuilder: (BuildContext context, int index) {
+          return new Card(
+            child: new GridTile(
+              footer: new Text(gameNames[index]),
+              child: Material(
+                // Might change this to local storage to decrease load time.
+                child: MaterialButton(
+                    onPressed: () {},
                     child: CachedNetworkImage(
-                      placeholder: (context, url) =>
-                          Container(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.0,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  themeColor),
-                            ),
-                            width: 90.0,
-                            height: 90.0,
-                            padding: EdgeInsets.all(20.0),
-                          ),
+                      placeholder: (context, url) => Container(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.0,
+                          valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                        ),
+                        width: 90.0,
+                        height: 90.0,
+                        padding: EdgeInsets.all(20.0),
+                      ),
                       imageUrl: gameImageUrls[index],
                       width: 90.0,
                       height: 90.0,
                       fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(45.0)),
-                    clipBehavior: Clip.hardEdge,
-                  ), //just for testing, will fill with image later
-                ),
-              );
-            },
-          ));
+                    )),
+                borderRadius: BorderRadius.all(Radius.circular(45.0)),
+                clipBehavior: Clip.hardEdge,
+              ), //just for testing, will fill with image later
+            ),
+          );
+        },
+      ));
     }
   }
 }

@@ -309,9 +309,8 @@ class SettingsScreenState extends State<SettingsScreen> {
                     child: Text(
                       'Username',
                       style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          color: primaryColor),
+                          fontSize: 18.0,
+                          color: Colors.white),
                     ),
                     margin: EdgeInsets.only(left: 10.0, bottom: 5.0, top: 10.0),
                   ),
@@ -341,7 +340,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   children: <Widget>[
                     Text(
                       "Gender:  ",
-                      style: TextStyle(fontSize: 20.0),
+                      style: TextStyle(fontSize: 18.0),
                     ),
                     SizedBox(
                       height: 40.0,
@@ -372,7 +371,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                       padding: const EdgeInsets.all(10.0),
                       child: Text(
                         "Which games do you play? :  ",
-                        style: TextStyle(fontSize: 20.0),
+                        style: TextStyle(fontSize: 18.0),
                       ),
                     )
                   ]),
@@ -388,7 +387,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                     return MultiSelectChip(reportList);
                   }),
 
-              Text('How serious are you?', style: TextStyle(fontSize: 20.0)),
+              Text('How serious are you?', style: TextStyle(fontSize: 18.0)),
               Slider(
                   value: sliderVal1,
                   min: 0,
@@ -400,7 +399,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   }),
               Divider(),
               Text('What Type of player are you: ',
-                  style: TextStyle(fontSize: 20.0)),
+                  style: TextStyle(fontSize: 18.0)),
               Slider(
                   value: sliderVal2,
                   min: 0,
