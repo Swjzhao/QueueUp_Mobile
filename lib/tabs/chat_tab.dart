@@ -1,20 +1,13 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:queueup_mobileapp/chat.dart';
 import 'package:queueup_mobileapp/const.dart';
-import 'package:queueup_mobileapp/login.dart';
-import 'package:queueup_mobileapp/settings.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/material.dart';
+
+import 'package:queueup_mobileapp/game_session_files/gameSessionsView.dart';
 
 class ChatTab extends StatefulWidget {
   static const String id = "CHATTAB";
@@ -25,6 +18,7 @@ class ChatTab extends StatefulWidget {
   @override
   State createState() => new ChatTabState(currentUserId:currentUserId);
 }
+
 class ChatTabState extends State<ChatTab> {
   ChatTabState({Key key, @required this.currentUserId});
   String currentUserId;
@@ -35,6 +29,13 @@ class ChatTabState extends State<ChatTab> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
   final GoogleSignIn googleSignIn = GoogleSignIn();
 
+  void testView (){
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                GameSessions(currentUserId: currentUserId)));
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,7 +75,7 @@ class ChatTabState extends State<ChatTab> {
           Icons.message,
           color: Colors.white,
         ),
-        //onPressed: _showModalSheet,
+        onPressed: testView,
       ),
     );
   }

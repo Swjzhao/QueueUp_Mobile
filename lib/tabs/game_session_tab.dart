@@ -86,7 +86,6 @@ class GameSessionTabState extends State<GameSessionTab> {
                       height: 90.0,
                       fit: BoxFit.cover,
                     )),
-                borderRadius: BorderRadius.all(Radius.circular(45.0)),
                 clipBehavior: Clip.hardEdge,
               ), //just for testing, will fill with image later
             ),
