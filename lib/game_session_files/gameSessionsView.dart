@@ -1,85 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:queueup_mobileapp/const.dart';
+import 'package:queueup_mobileapp/game_session_files/createSession.dart';
 
 class GameSessions extends StatefulWidget {
   static const String id = "GameSessions";
 
   final String currentUserId;
   final String gameId;
+  final String gameName;
 
-  GameSessions({Key key, @required this.currentUserId, @required this.gameId})
+  GameSessions(
+      {Key key,
+      @required this.currentUserId,
+      @required this.gameId,
+      @required this.gameName})
       : super(key: key);
 
   @override
-  State createState() =>
-      new GameSessionsState(currentUserId: currentUserId, gameId: gameId);
+  State createState() => new GameSessionsState(
+      currentUserId: currentUserId, gameId: gameId, gameName: gameName);
 }
 
 class GameSessionsState extends State<GameSessions> {
   GameSessionsState(
-      {Key key, @required this.currentUserId, @required this.gameId});
+      {Key key,
+      @required this.currentUserId,
+      @required this.gameId,
+      @required this.gameName});
   bool isLoading = false;
   String currentUserId;
   String gameId;
+  String gameName;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Container();
-    } else {
-      return Scaffold(
-        body: Stack(
-          children: <Widget>[
-            Container(
-              child: StreamBuilder(
-                stream: Firestore.instance
-                    .collection('gameSessions')
-                    .document(gameId)
-                    .collection("sessions")
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  print(gameId);
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+    return new Scaffold(
+        appBar: new AppBar(
+          title: new Text(
+            gameName,
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+        ),
+        body: isLoading
+            ? Container()
+            : Scaffold(
+                body: Stack(
+                  children: <Widget>[
+                    Container(
+                      child: StreamBuilder(
+                        stream: Firestore.instance
+                            .collection('gameSessions')
+                            .document(gameId)
+                            .collection("sessions")
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Center(
+                              child: CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(themeColor),
+                              ),
+                            );
+                          } else {
+                            return ListView.builder(
+                              padding: EdgeInsets.all(10.0),
+                              itemBuilder: (context, index) => buildItem(
+                                  context, snapshot.data.documents[index]),
+                              itemCount: snapshot.data.documents.length,
+                            );
+                          }
+                        },
                       ),
-                    );
-                  } else {
-                    print(snapshot.data.documents.toString());
-                    return ListView.builder(
-                      padding: EdgeInsets.all(10.0),
-                      itemBuilder: (context, index) =>
-                          buildItem(context, snapshot.data.documents[index]),
-                      itemCount: snapshot.data.documents.length,
-                    );
-                  }
-                },
-              ),
-            ),
+                    ),
 
-            // Loading
-          ],
-        ),
-        floatingActionButton: new FloatingActionButton.extended(
-          backgroundColor: Theme.of(context).accentColor,
-          icon: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
-          label: Text(
-            "Create a new Session",
-            style: TextStyle(color: Colors.white),
-          ),
-          onPressed: () {},
-        ),
-      );
-    }
+                    // Loading
+                  ],
+                ),
+                floatingActionButton: new FloatingActionButton.extended(
+                  backgroundColor: Theme.of(context).buttonColor,
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    "Create a session",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CreateSession(
+                                  currentUserId: currentUserId,
+                                  gameId: gameId,
+                                  gameName: gameName,
+                                )));
+                  },
+                ),
+              ));
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    print('${document['sessionName']}');
     return Container(
       child: FlatButton(
         child: Row(

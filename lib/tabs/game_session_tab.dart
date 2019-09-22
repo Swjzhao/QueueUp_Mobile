@@ -58,6 +58,7 @@ class GameSessionTabState extends State<GameSessionTab> {
 
   @override
   Widget build(BuildContext context) {
+
     if (isLoading) {
       return Container();
     } else {
@@ -80,7 +81,8 @@ class GameSessionTabState extends State<GameSessionTab> {
                           MaterialPageRoute(
                               builder: (context) => GameSessions(
                                   currentUserId: currentUserId,
-                                  gameId: gameSessionIDs[index])));
+                                  gameId: gameSessionIDs[index],
+                                  gameName: gameNames[index])));
                     },
                     child: CachedNetworkImage(
                       placeholder: (context, url) => Container(
