@@ -40,14 +40,21 @@ class GameSessionsState extends State<GameSessions> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   print(gameId);
-
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                      ),
+                    );
+                  } else {
+                    print(snapshot.data.documents.toString());
                     return ListView.builder(
                       padding: EdgeInsets.all(10.0),
                       itemBuilder: (context, index) =>
                           buildItem(context, snapshot.data.documents[index]),
                       itemCount: snapshot.data.documents.length,
                     );
-
+                  }
                 },
               ),
             ),
