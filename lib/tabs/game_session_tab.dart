@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:queueup_mobileapp/const.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import 'package:queueup_mobileapp/game_session_files/gameSessionsView.dart';
+
 class GameSessionTab extends StatefulWidget {
   static const String id = "GameSessionTab";
 
@@ -24,6 +26,7 @@ class GameSessionTabState extends State<GameSessionTab> {
   final Firestore _firestore = Firestore.instance;
   List<String> gameNames = new List();
   List<String> gameImageUrls = new List();
+  List<String> gameSessionIDs = new List();
   bool isLoading = true;
 
   Future<void> readLocal() async {
@@ -39,6 +42,7 @@ class GameSessionTabState extends State<GameSessionTab> {
       docs.map((item) {
         gameNames.add(item.data['game']);
         gameImageUrls.add(item.data['imageUrl']);
+        gameSessionIDs.add(item.data["sessionID"]);
       }).toList();
       this.setState(() {
         isLoading = false;
@@ -70,7 +74,14 @@ class GameSessionTabState extends State<GameSessionTab> {
               child: Material(
                 // Might change this to local storage to decrease load time.
                 child: MaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => GameSessions(
+                                  currentUserId: currentUserId,
+                                  gameId: gameSessionIDs[index])));
+                    },
                     child: CachedNetworkImage(
                       placeholder: (context, url) => Container(
                         child: CircularProgressIndicator(

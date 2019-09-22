@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:queueup_mobileapp/chat.dart';
 import 'package:queueup_mobileapp/const.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class GameSessions extends StatefulWidget {
   static const String id = "GameSessions";
 
   final String currentUserId;
+  final String gameId;
 
-  GameSessions({Key key, @required this.currentUserId}) : super(key: key);
+  GameSessions({Key key, @required this.currentUserId, @required this.gameId})
+      : super(key: key);
 
   @override
-  State createState() => new GameSessionsState(currentUserId: currentUserId);
+  State createState() =>
+      new GameSessionsState(currentUserId: currentUserId, gameId: gameId);
 }
 
 class GameSessionsState extends State<GameSessions> {
-  GameSessionsState({Key key, @required this.currentUserId});
+  GameSessionsState(
+      {Key key, @required this.currentUserId, @required this.gameId});
   bool isLoading = false;
   String currentUserId;
-  String gameId = "o4Y6pL3Y9YnPLlo6CVpk";
+  String gameId;
 
   @override
   Widget build(BuildContext context) {
@@ -28,60 +29,50 @@ class GameSessionsState extends State<GameSessions> {
       return Container();
     } else {
       return Scaffold(
-          body: Stack(
-        children: <Widget>[
-          // List
-          Container(
-            child: StreamBuilder(
-              stream: Firestore.instance
-                  .collection('gameSessions')
-                  .document(gameId)
-                  .collection("sessions")
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                    ),
-                  );
-                } else {
-                  return ListView.builder(
-                    padding: EdgeInsets.all(10.0),
-                    itemBuilder: (context, index) =>
-                        buildItem(context, snapshot.data.documents[index]),
-                    itemCount: snapshot.data.documents.length,
-                  );
-                }
-              },
+        body: Stack(
+          children: <Widget>[
+            Container(
+              child: StreamBuilder(
+                stream: Firestore.instance
+                    .collection('gameSessions')
+                    .document(gameId)
+                    .collection("sessions")
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  print(gameId);
+
+                    return ListView.builder(
+                      padding: EdgeInsets.all(10.0),
+                      itemBuilder: (context, index) =>
+                          buildItem(context, snapshot.data.documents[index]),
+                      itemCount: snapshot.data.documents.length,
+                    );
+
+                },
+              ),
             ),
+
+            // Loading
+          ],
+        ),
+        floatingActionButton: new FloatingActionButton.extended(
+          backgroundColor: Theme.of(context).accentColor,
+          icon: Icon(
+            Icons.add,
+            color: Colors.white,
           ),
-          Container(
-              child: FlatButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Chat(
-                            )
-                        ));
-                  },
-                  child: Text(
-                    'SIGN IN WITH GOOGLE',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                  color: Color(0xffdd4b39),
-                  highlightColor: Color(0xffff7f7f),
-                  splashColor: Colors.transparent,
-                  textColor: Colors.white,
-                  padding: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 15.0)))
-          // Loading
-        ],
-      ));
+          label: Text(
+            "Create a new Session",
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: () {},
+        ),
+      );
     }
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document) {
+    print('${document['sessionName']}');
     return Container(
       child: FlatButton(
         child: Row(
@@ -111,7 +102,7 @@ class GameSessionsState extends State<GameSessions> {
               ),
             ),
             Text(
-              '${document['currentCapacity']} / ${document['max Capacity']} ',
+              '${document['currentCapacity']} / ${document['maxCapacity']} ',
               style: TextStyle(color: primaryColor),
             ),
           ],
