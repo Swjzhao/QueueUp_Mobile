@@ -33,6 +33,8 @@ class GameSessionsState extends State<GameSessions> {
   String gameId;
   String gameName;
 
+
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
