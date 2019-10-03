@@ -100,7 +100,6 @@ class _CreateAccountState extends State<CreateAccount> {
         await prefs.setString('photoUrl',
             "https://firebasestorage.googleapis.com/v0/b/queueup-51825.appspot.com/o/no-img.png?alt=media");
         await prefs.setString('countryCode', myLocale.countryCode);
-
         Fluttertoast.showToast(msg: "Sign in success");
 
         Navigator.push(

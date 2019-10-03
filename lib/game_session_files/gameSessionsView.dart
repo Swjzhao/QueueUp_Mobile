@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:queueup_mobileapp/const.dart';
 import 'package:queueup_mobileapp/game_session_files/createSession.dart';
+import 'package:queueup_mobileapp/game_session_files/gameSession.dart';
 
 class GameSessions extends StatefulWidget {
   static const String id = "GameSessions";
@@ -139,7 +140,16 @@ class GameSessionsState extends State<GameSessions> {
             ),
           ],
         ),
-        onPressed: () {},
+        onPressed: () {  Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => GameSession(
+                  currentUserId: currentUserId,
+                  gameId: gameId,
+                  gameName: gameName,
+                  gameSessionName:  '${document['sessionName']}'
+                )));
+        },
         color: greyColor2,
         padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
         shape:

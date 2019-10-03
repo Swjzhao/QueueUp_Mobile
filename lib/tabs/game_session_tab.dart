@@ -58,7 +58,6 @@ class GameSessionTabState extends State<GameSessionTab> {
 
   @override
   Widget build(BuildContext context) {
-
     if (isLoading) {
       return Container();
     } else {

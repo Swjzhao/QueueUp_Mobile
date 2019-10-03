@@ -67,7 +67,7 @@ class CreateSessionState extends State<CreateSession> {
       isLoading = true;
     });
 
-    Firestore.instance.collection('gameSessions').document(gameId).collection('sessions').add({
+    Firestore.instance.collection('gameSessions').document(gameId).collection('sessions').document(currentUserId).setData({
       'currentCapacity': 1,
       'hostID': currentUserId,
       'maxCapacity': maxPlayers,
