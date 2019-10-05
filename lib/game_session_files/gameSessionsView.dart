@@ -34,8 +34,6 @@ class GameSessionsState extends State<GameSessions> {
   String gameId;
   String gameName;
 
-
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -49,36 +47,60 @@ class GameSessionsState extends State<GameSessions> {
         body: isLoading
             ? Container()
             : Scaffold(
-                body: Stack(
+                body: Column(
                   children: <Widget>[
-                    Container(
-                      child: StreamBuilder(
-                        stream: Firestore.instance
-                            .collection('gameSessions')
-                            .document(gameId)
-                            .collection("sessions")
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(themeColor),
-                              ),
-                            );
-                          } else {
-                            return ListView.builder(
-                              padding: EdgeInsets.all(10.0),
-                              itemBuilder: (context, index) => buildItem(
-                                  context, snapshot.data.documents[index]),
-                              itemCount: snapshot.data.documents.length,
-                            );
-                          }
-                        },
-                      ),
+                    SizedBox(
+                      height: 10.0,
                     ),
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(
+                              bottom: 5.0, left: 15.0, right: 5.0),
+                          child: Text('Host'),
+                        )
+                      ],
+                    ),
+                    Divider(indent: 10.0, endIndent: 10.0, color: Colors.white),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Expanded(
+                      child:
+                    Stack(
+                      children: <Widget>[
 
-                    // Loading
+                        Container(
+                          child: StreamBuilder(
+                            stream: Firestore.instance
+                                .collection('gameSessions')
+                                .document(gameId)
+                                .collection("sessions")
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        themeColor),
+                                  ),
+                                );
+                              } else {
+                                return ListView.builder(
+                                  padding: EdgeInsets.all(10.0),
+                                  itemBuilder: (context, index) => buildItem(
+                                      context, snapshot.data.documents[index]),
+                                  itemCount: snapshot.data.documents.length,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+
+                        // Loading
+                      ],
+                    ),
+                    )
                   ],
                 ),
                 floatingActionButton: new FloatingActionButton.extended(
@@ -140,15 +162,20 @@ class GameSessionsState extends State<GameSessions> {
             ),
           ],
         ),
-        onPressed: () {  Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => GameSession(
-                  currentUserId: currentUserId,
-                  gameId: gameId,
-                  gameName: gameName,
-                  gameSessionName:  '${document['sessionName']}'
-                )));
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => GameSession(
+                        currentUserId: currentUserId,
+                        gameId: gameId,
+                        gameName: gameName,
+                        gameSessionName: '${document['sessionName']}',
+                        gameSessionID: document.documentID,
+                        // consider to fact that someone changes username
+                        hostID: '${document['hostID']}',
+                        hostName: '${document['hostName']}',
+                      )));
         },
         color: greyColor2,
         padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),

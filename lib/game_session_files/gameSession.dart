@@ -11,18 +11,30 @@ class GameSession extends StatefulWidget {
   final String gameId;
   final String gameName;
   final String gameSessionName;
+  final String gameSessionID;
+  final String hostID;
+  final String hostName;
 
   GameSession(
       {Key key,
       @required this.currentUserId,
       @required this.gameId,
       @required this.gameName,
-      @required this.gameSessionName})
+      @required this.gameSessionName,
+      @required this.gameSessionID,
+      @required this.hostID,
+      @required this.hostName})
       : super(key: key);
 
   @override
   State createState() => new GameSessionState(
-      currentUserId: currentUserId, gameId: gameId, gameName: gameName, gameSessionName:gameSessionName);
+      currentUserId: currentUserId,
+      gameId: gameId,
+      gameName: gameName,
+      gameSessionName: gameSessionName,
+      gameSessionID: gameSessionID,
+      hostID: hostID,
+      hostName: hostName);
 }
 
 class GameSessionState extends State<GameSession> {
@@ -31,13 +43,19 @@ class GameSessionState extends State<GameSession> {
       @required this.currentUserId,
       @required this.gameId,
       @required this.gameName,
-      @required this.gameSessionName});
+      @required this.gameSessionName,
+      @required this.gameSessionID,
+      @required this.hostID,
+      @required this.hostName});
 
   bool isLoading = false;
   String currentUserId;
   String gameId;
   String gameName;
   String gameSessionName;
+  String gameSessionID;
+  String hostID;
+  String hostName;
 
   @override
   Widget build(BuildContext context) {
@@ -52,36 +70,91 @@ class GameSessionState extends State<GameSession> {
         body: isLoading
             ? Container()
             : Scaffold(
-                body: Stack(
+                body: Column(
                   children: <Widget>[
-                    Container(
-                      child: StreamBuilder(
-                        stream: Firestore.instance
-                            .collection('gameSessions')
-                            .document(gameId)
-                            .collection("sessions")
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Center(
-                              child: CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(themeColor),
-                              ),
-                            );
-                          } else {
-                            return ListView.builder(
-                              padding: EdgeInsets.all(10.0),
-                              itemBuilder: (context, index) => buildItem(
-                                  context, snapshot.data.documents[index]),
-                              itemCount: snapshot.data.documents.length,
-                            );
-                          }
-                        },
-                      ),
-                    ),
 
-                    // Loading
+                    Stack(
+                      children: <Widget>[
+                        Container(
+                          child: FlatButton(
+                            child: Row(
+                              children: <Widget>[
+                                Flexible(
+                                  child: Container(
+                                    child: Column(
+                                      children: <Widget>[
+                                        Container(
+                                          child: Text(
+                                            'Host ',
+                                            style:
+                                                TextStyle(color: primaryColor),
+                                          ),
+                                          alignment: Alignment.centerLeft,
+                                          margin: EdgeInsets.fromLTRB(
+                                              10.0, 0.0, 0.0, 5.0),
+                                        ),
+                                        Container(
+                                          child: Text(
+                                            hostName,
+                                            style:
+                                                TextStyle(color: primaryColor),
+                                          ),
+                                          alignment: Alignment.centerLeft,
+                                          margin: EdgeInsets.fromLTRB(
+                                              10.0, 0.0, 0.0, 0.0),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onPressed: () {},
+                            color: greyColor2,
+                            padding:
+                                EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0)),
+                          ),
+                          margin: EdgeInsets.only(
+                              bottom: 10.0, left: 5.0, right: 5.0),
+                        ),
+                      ],
+                    ),
+                    Stack(
+                      children: <Widget>[
+                        Container(
+                          child: StreamBuilder(
+                            stream: Firestore.instance
+                                .collection('gameSessions')
+                                .document(gameId)
+                                .collection("sessions")
+                                .document(gameSessionID)
+                                .collection("players")
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        themeColor),
+                                  ),
+                                );
+                              } else {
+                                return ListView.builder(
+                                  padding: EdgeInsets.all(10.0),
+                                  itemBuilder: (context, index) => buildItem(
+                                      context, snapshot.data.documents[index]),
+                                  itemCount: snapshot.data.documents.length,
+                                );
+                              }
+                            },
+                          ),
+                        ),
+
+                        // Loading
+                      ],
+                    ),
                   ],
                 ),
                 floatingActionButton: new FloatingActionButton.extended(
@@ -91,12 +164,10 @@ class GameSessionState extends State<GameSession> {
                     color: Colors.white,
                   ),
                   label: Text(
-                    "Create a session",
+                    "Join",
                     style: TextStyle(color: Colors.white),
                   ),
-                  onPressed: () {
-
-                  },
+                  onPressed: () {},
                 ),
               ));
   }
