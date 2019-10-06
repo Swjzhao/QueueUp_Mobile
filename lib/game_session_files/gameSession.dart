@@ -179,6 +179,7 @@ class GameSessionState extends State<GameSession> {
       floatingWindow = Container();
     }
 
+    Color tabColor = currentUserId == hostID? ThemeData.light().cardColor:greyColor2;
     return new Scaffold(
         appBar: new AppBar(
           title: new Text(
@@ -263,7 +264,7 @@ class GameSessionState extends State<GameSession> {
                               ],
                             ),
                             onPressed: () {},
-                            color: greyColor2,
+                            color: tabColor,
                             padding:
                                 EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
                             shape: RoundedRectangleBorder(
@@ -319,6 +320,7 @@ class GameSessionState extends State<GameSession> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document, int index) {
+    Color tabColor = currentUserId == '${document['playerID']}'? ThemeData.light().cardColor:greyColor2;
     return Container(
       child: FlatButton(
         child: Row(
@@ -354,7 +356,7 @@ class GameSessionState extends State<GameSession> {
           ],
         ),
         onPressed: handleJoinSession,
-        color: greyColor2,
+        color: tabColor,
         padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
