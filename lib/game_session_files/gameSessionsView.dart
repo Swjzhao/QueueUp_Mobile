@@ -192,6 +192,7 @@ class GameSessionsState extends State<GameSessions> {
             ],
           ),
           onPressed: () {
+
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -204,6 +205,8 @@ class GameSessionsState extends State<GameSessions> {
                           // consider to fact that someone changes username
                           hostID: '${document['hostID']}',
                           hostName: '${document['hostName']}',
+                      currentCapacity: document['currentCapacity'],
+                      maxCapacity: document['maxCapacity'],
                         )));
           },
           color: greyColor2,
@@ -266,7 +269,9 @@ class GameSessionsState extends State<GameSessions> {
                           gameSessionID: document.documentID,
                           // consider to fact that someone changes username
                           hostID: '${document['hostID']}',
-                          hostName: '${document['hostName']}',
+                          hostName: '${document['hostName']}', currentCapacity: document['currentCapacity'],
+                      maxCapacity: document['maxCapacity'],
+
                         )));
           },
           color: greyColor2,

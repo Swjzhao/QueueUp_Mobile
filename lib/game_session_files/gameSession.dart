@@ -14,6 +14,8 @@ class GameSession extends StatefulWidget {
   final String gameSessionID;
   final String hostID;
   final String hostName;
+  final int currentCapacity;
+  final int maxCapacity;
 
   GameSession(
       {Key key,
@@ -23,7 +25,9 @@ class GameSession extends StatefulWidget {
       @required this.gameSessionName,
       @required this.gameSessionID,
       @required this.hostID,
-      @required this.hostName})
+      @required this.hostName,
+      @required this.currentCapacity,
+      @required this.maxCapacity})
       : super(key: key);
 
   @override
@@ -34,7 +38,9 @@ class GameSession extends StatefulWidget {
       gameSessionName: gameSessionName,
       gameSessionID: gameSessionID,
       hostID: hostID,
-      hostName: hostName);
+      hostName: hostName,
+      currentCapacity: currentCapacity,
+      maxCapacity: maxCapacity);
 }
 
 class GameSessionState extends State<GameSession> {
@@ -46,7 +52,9 @@ class GameSessionState extends State<GameSession> {
       @required this.gameSessionName,
       @required this.gameSessionID,
       @required this.hostID,
-      @required this.hostName});
+      @required this.hostName,
+      @required this.currentCapacity,
+      @required this.maxCapacity});
 
   bool isLoading = false;
   String currentUserId;
@@ -56,9 +64,72 @@ class GameSessionState extends State<GameSession> {
   String gameSessionID;
   String hostID;
   String hostName;
+  int currentCapacity;
+  int maxCapacity;
+
+  void handleJoinSession() {
+    print(currentCapacity.toString() + ' ' + maxCapacity.toString());
+    if (currentCapacity == maxCapacity) {
+      Fluttertoast.showToast(msg: "Full");
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
+
+    Firestore.instance
+        .collection('gameSessions')
+        .document(gameId)
+        .collection('sessions')
+        .document(hostID)
+        .collection('players')
+        .document(DateTime.now().millisecondsSinceEpoch.toString())
+        .setData({'playerID': currentUserId}).then((data) async {
+      setState(() {
+        isLoading = false;
+      });
+
+      Fluttertoast.showToast(msg: "Session Joined");
+    }).catchError((err) {
+      setState(() {
+        isLoading = false;
+      });
+
+      Fluttertoast.showToast(msg: err.toString());
+    });
+
+    Firestore.instance
+        .collection('gameSessions')
+        .document(gameId)
+        .collection('sessions')
+        .document(hostID)
+        .updateData({'currentCapacity': ++currentCapacity}).then((data) async {
+      Navigator.pop(context);
+    }).catchError((err) {
+      Fluttertoast.showToast(msg: err.toString());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget floatingWindow;
+    if (currentUserId != hostID) {
+      floatingWindow = FloatingActionButton.extended(
+        backgroundColor: Theme.of(context).buttonColor,
+        icon: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        label: Text(
+          "Join",
+          style: TextStyle(color: Colors.white),
+        ),
+        onPressed: handleJoinSession,
+      );
+    } else {
+      floatingWindow = Container();
+    }
+
     return new Scaffold(
         appBar: new AppBar(
           title: new Text(
@@ -76,7 +147,6 @@ class GameSessionState extends State<GameSession> {
                       children: <Widget>[
                         Container(
                           child: FlatButton(
-
                             child: Row(
                               children: <Widget>[
                                 Text(
@@ -147,11 +217,11 @@ class GameSessionState extends State<GameSession> {
                                   );
                                 } else {
                                   return ListView.builder(
-                                    padding: EdgeInsets.all(10.0),
+                                    padding: EdgeInsets.only(bottom: 10, top: 10),
                                     itemBuilder: (context, index) => buildItem(
                                         context,
                                         snapshot.data.documents[index],
-                                    index+1),
+                                        index + 2),
                                     itemCount: snapshot.data.documents.length,
                                   );
                                 }
@@ -165,19 +235,7 @@ class GameSessionState extends State<GameSession> {
                     )
                   ],
                 ),
-                floatingActionButton: new FloatingActionButton.extended(
-                  backgroundColor: Theme.of(context).buttonColor,
-                  icon: Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  ),
-                  label: Text(
-                    "Join",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  onPressed: () {},
-                ),
-              ));
+                floatingActionButton: floatingWindow));
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document, int index) {
@@ -195,7 +253,7 @@ class GameSessionState extends State<GameSession> {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        '${document['sessionName']}',
+                        '${document['playerID']}',
                         style: TextStyle(color: primaryColor),
                       ),
                       alignment: Alignment.centerLeft,
@@ -203,7 +261,7 @@ class GameSessionState extends State<GameSession> {
                     ),
                     Container(
                       child: Text(
-                        'Hosted by: ${document['hostName']}',
+                        'Other Info',
                         style: TextStyle(color: primaryColor),
                       ),
                       alignment: Alignment.centerLeft,
@@ -213,13 +271,10 @@ class GameSessionState extends State<GameSession> {
                 ),
               ),
             ),
-            Text(
-              '${document['currentCapacity']} / ${document['maxCapacity']} ',
-              style: TextStyle(color: primaryColor),
-            ),
+
           ],
         ),
-        onPressed: () {},
+        onPressed: handleJoinSession,
         color: greyColor2,
         padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
         shape:
