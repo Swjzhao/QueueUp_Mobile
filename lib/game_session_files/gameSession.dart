@@ -152,9 +152,35 @@ class GameSessionState extends State<GameSession> {
         .collection('sessions')
         .document(hostID)
         .collection('players')
-        .document(DateTime.now().millisecondsSinceEpoch.toString())
-        .setData({'playerID': currentUserId, 'playerName': username}).then(
-            (data) async {
+        .document(currentUserId)
+        .get()
+        .then((data) async {
+      if (!data.exists) {
+        Firestore.instance
+            .collection('gameSessions')
+            .document(gameId)
+            .collection('sessions')
+            .document(hostID)
+            .updateData({'currentCapacity': ++currentCapacity})
+            .then((data) async {})
+            .catchError((err) {
+          Fluttertoast.showToast(msg: err.toString());
+        });
+      }
+
+      Firestore.instance
+          .collection('gameSessions')
+          .document(gameId)
+          .collection('sessions')
+          .document(hostID)
+          .collection('players')
+          .document(currentUserId)
+          .setData({
+        'playerID': currentUserId,
+        'playerName': username,
+        'joinedAt': DateTime.now().millisecondsSinceEpoch
+      });
+
       setState(() {
         isLoading = false;
       });
@@ -168,12 +194,13 @@ class GameSessionState extends State<GameSession> {
       Fluttertoast.showToast(msg: err.toString());
     });
 
+
     Firestore.instance
-        .collection('gameSessions')
-        .document(gameId)
+        .collection('users')
+        .document(currentUserId)
         .collection('sessions')
-        .document(hostID)
-        .updateData({'currentCapacity': ++currentCapacity}).then((data) async {
+        .document(gameSessionID)
+        .setData({'gameSessionID': gameSessionID}).then((data) async {
       Navigator.pop(context);
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.toString());
@@ -319,6 +346,7 @@ class GameSessionState extends State<GameSession> {
                                   .collection("sessions")
                                   .document(gameSessionID)
                                   .collection("players")
+                                  .orderBy('joinedAt')
                                   .snapshots(),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData) {
