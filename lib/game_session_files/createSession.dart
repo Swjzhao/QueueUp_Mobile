@@ -82,11 +82,23 @@ class CreateSessionState extends State<CreateSession> {
       });
 
       Fluttertoast.showToast(msg: "Session Created");
-      Navigator.pop(context);
+
     }).catchError((err) {
       setState(() {
         isLoading = false;
       });
+
+      Fluttertoast.showToast(msg: err.toString());
+    });
+
+    Firestore.instance.collection('users').document(currentUserId).updateData({
+      'hostedGameNum': 1,
+      'hostedGame':currentUserId
+    }).then((data) async {
+
+      Navigator.pop(context);
+    }).catchError((err) {
+
 
       Fluttertoast.showToast(msg: err.toString());
     });

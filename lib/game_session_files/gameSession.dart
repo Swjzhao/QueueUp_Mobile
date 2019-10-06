@@ -72,13 +72,17 @@ class GameSessionState extends State<GameSession> {
             : Scaffold(
                 body: Column(
                   children: <Widget>[
-
                     Stack(
                       children: <Widget>[
                         Container(
                           child: FlatButton(
+
                             child: Row(
                               children: <Widget>[
+                                Text(
+                                  '1 ',
+                                  style: TextStyle(color: primaryColor),
+                                ),
                                 Flexible(
                                   child: Container(
                                     child: Column(
@@ -121,40 +125,44 @@ class GameSessionState extends State<GameSession> {
                         ),
                       ],
                     ),
-                    Stack(
-                      children: <Widget>[
-                        Container(
-                          child: StreamBuilder(
-                            stream: Firestore.instance
-                                .collection('gameSessions')
-                                .document(gameId)
-                                .collection("sessions")
-                                .document(gameSessionID)
-                                .collection("players")
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        themeColor),
-                                  ),
-                                );
-                              } else {
-                                return ListView.builder(
-                                  padding: EdgeInsets.all(10.0),
-                                  itemBuilder: (context, index) => buildItem(
-                                      context, snapshot.data.documents[index]),
-                                  itemCount: snapshot.data.documents.length,
-                                );
-                              }
-                            },
+                    Expanded(
+                      child: Stack(
+                        children: <Widget>[
+                          Container(
+                            child: StreamBuilder(
+                              stream: Firestore.instance
+                                  .collection('gameSessions')
+                                  .document(gameId)
+                                  .collection("sessions")
+                                  .document(gameSessionID)
+                                  .collection("players")
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          themeColor),
+                                    ),
+                                  );
+                                } else {
+                                  return ListView.builder(
+                                    padding: EdgeInsets.all(10.0),
+                                    itemBuilder: (context, index) => buildItem(
+                                        context,
+                                        snapshot.data.documents[index],
+                                    index+1),
+                                    itemCount: snapshot.data.documents.length,
+                                  );
+                                }
+                              },
+                            ),
                           ),
-                        ),
 
-                        // Loading
-                      ],
-                    ),
+                          // Loading
+                        ],
+                      ),
+                    )
                   ],
                 ),
                 floatingActionButton: new FloatingActionButton.extended(
@@ -172,11 +180,15 @@ class GameSessionState extends State<GameSession> {
               ));
   }
 
-  Widget buildItem(BuildContext context, DocumentSnapshot document) {
+  Widget buildItem(BuildContext context, DocumentSnapshot document, int index) {
     return Container(
       child: FlatButton(
         child: Row(
           children: <Widget>[
+            Text(
+              index.toString(),
+              style: TextStyle(color: primaryColor),
+            ),
             Flexible(
               child: Container(
                 child: Column(

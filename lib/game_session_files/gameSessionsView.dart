@@ -57,21 +57,14 @@ class GameSessionsState extends State<GameSessions> {
                         Container(
                           margin: EdgeInsets.only(
                               bottom: 5.0, left: 15.0, right: 5.0),
-                          child: Text('Host'),
+                          child: Text('Hosted'),
                         )
                       ],
                     ),
-                    Divider(indent: 10.0, endIndent: 10.0, color: Colors.white),
-                    SizedBox(
-                      height: 5.0,
-                    ),
                     Expanded(
-                      child:
-                    Stack(
-                      children: <Widget>[
-
-                        Container(
-                          child: StreamBuilder(
+                      child: Stack(
+                        children: <Widget>[
+                          StreamBuilder(
                             stream: Firestore.instance
                                 .collection('gameSessions')
                                 .document(gameId)
@@ -87,19 +80,51 @@ class GameSessionsState extends State<GameSessions> {
                                 );
                               } else {
                                 return ListView.builder(
-                                  padding: EdgeInsets.all(10.0),
-                                  itemBuilder: (context, index) => buildItem(
+                                  itemBuilder: (context, index) => buildHost(
                                       context, snapshot.data.documents[index]),
                                   itemCount: snapshot.data.documents.length,
                                 );
                               }
                             },
                           ),
-                        ),
-
-                        // Loading
-                      ],
+                        ],
+                      ),
                     ),
+                    Divider(indent: 10.0, endIndent: 10.0, color: Colors.white),
+                    SizedBox(
+                      height: 5.0,
+                    ),
+                    Expanded(
+                      child: Stack(
+                        children: <Widget>[
+                          Container(
+                            child: StreamBuilder(
+                              stream: Firestore.instance
+                                  .collection('gameSessions')
+                                  .document(gameId)
+                                  .collection("sessions")
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          themeColor),
+                                    ),
+                                  );
+                                } else {
+                                  return ListView.builder(
+                                    itemBuilder: (context, index) => buildItem(
+                                        context,
+                                        snapshot.data.documents[index]),
+                                    itemCount: snapshot.data.documents.length,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     )
                   ],
                 ),
@@ -127,63 +152,130 @@ class GameSessionsState extends State<GameSessions> {
               ));
   }
 
-  Widget buildItem(BuildContext context, DocumentSnapshot document) {
-    return Container(
-      child: FlatButton(
-        child: Row(
-          children: <Widget>[
-            Flexible(
-              child: Container(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      child: Text(
-                        '${document['sessionName']}',
-                        style: TextStyle(color: primaryColor),
+  Widget buildHost(BuildContext context, DocumentSnapshot document) {
+    if (document['hostID'] != currentUserId)
+      return Container();
+    else
+      return Container(
+        padding: EdgeInsets.all(10.0),
+        child: FlatButton(
+          child: Row(
+            children: <Widget>[
+              Flexible(
+                child: Container(
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        child: Text(
+                          '${document['sessionName']}',
+                          style: TextStyle(color: primaryColor),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                       ),
-                      alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                    ),
-                    Container(
-                      child: Text(
-                        'Hosted by: ${document['hostName']}',
-                        style: TextStyle(color: primaryColor),
-                      ),
-                      alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                    )
-                  ],
+                      Container(
+                        child: Text(
+                          'Hosted by: ${document['hostName']}',
+                          style: TextStyle(color: primaryColor),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Text(
-              '${document['currentCapacity']} / ${document['maxCapacity']} ',
-              style: TextStyle(color: primaryColor),
-            ),
-          ],
+              Text(
+                '${document['currentCapacity']} / ${document['maxCapacity']} ',
+                style: TextStyle(color: primaryColor),
+              ),
+            ],
+          ),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GameSession(
+                          currentUserId: currentUserId,
+                          gameId: gameId,
+                          gameName: gameName,
+                          gameSessionName: '${document['sessionName']}',
+                          gameSessionID: document.documentID,
+                          // consider to fact that someone changes username
+                          hostID: '${document['hostID']}',
+                          hostName: '${document['hostName']}',
+                        )));
+          },
+          color: greyColor2,
+          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => GameSession(
-                        currentUserId: currentUserId,
-                        gameId: gameId,
-                        gameName: gameName,
-                        gameSessionName: '${document['sessionName']}',
-                        gameSessionID: document.documentID,
-                        // consider to fact that someone changes username
-                        hostID: '${document['hostID']}',
-                        hostName: '${document['hostName']}',
-                      )));
-        },
-        color: greyColor2,
-        padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      ),
-      margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
-    );
+        margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+      );
+  }
+
+  Widget buildItem(BuildContext context, DocumentSnapshot document) {
+    if (document['hostID'] == currentUserId)
+      return Container();
+    else
+      return Container(
+        padding: EdgeInsets.all(10.0),
+        child: FlatButton(
+          child: Row(
+            children: <Widget>[
+              Flexible(
+                child: Container(
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        child: Text(
+                          '${document['sessionName']}',
+                          style: TextStyle(color: primaryColor),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                      ),
+                      Container(
+                        child: Text(
+                          'Hosted by: ${document['hostName']}',
+                          style: TextStyle(color: primaryColor),
+                        ),
+                        alignment: Alignment.centerLeft,
+                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Text(
+                '${document['currentCapacity']} / ${document['maxCapacity']} ',
+                style: TextStyle(color: primaryColor),
+              ),
+            ],
+          ),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => GameSession(
+                          currentUserId: currentUserId,
+                          gameId: gameId,
+                          gameName: gameName,
+                          gameSessionName: '${document['sessionName']}',
+                          gameSessionID: document.documentID,
+                          // consider to fact that someone changes username
+                          hostID: '${document['hostID']}',
+                          hostName: '${document['hostName']}',
+                        )));
+          },
+          color: greyColor2,
+          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        ),
+        margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
+      );
   }
 }
 
