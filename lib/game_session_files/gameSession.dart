@@ -124,15 +124,38 @@ class GameSessionState extends State<GameSession> {
     readLocal();
   }
 
-  void clickUser(String playerID) {
+  void deleteSession(){
     Firestore.instance
-        .collection('users')
-        .document(playerID)
-        .get()
-        .then((DocumentSnapshot ds) {
-      Navigator.of(context).push(new PageRouteBuilder(
-        pageBuilder: (_, __, ___) => new DetailPage(snapshot: ds),
-      ));
+        .collection('gameSessions')
+        .document(gameId)
+        .collection('sessions')
+        .document(hostID).delete()
+        .then((data) async{
+      Fluttertoast.showToast(msg: "Deleted Session");
+      Navigator.pop(context);
+    });
+  }
+  void leaveSession() {
+    Firestore.instance
+        .collection('gameSessions')
+        .document(gameId)
+        .collection('sessions')
+        .document(hostID)
+        .collection('players')
+        .document(currentUserId).delete()
+        .then((data) async {
+      Firestore.instance
+          .collection('gameSessions')
+          .document(gameId)
+          .collection('sessions')
+          .document(hostID)
+          .updateData({'currentCapacity': --currentCapacity})
+          .then((data) async {})
+          .catchError((err) {
+        Fluttertoast.showToast(msg: err.toString());
+      });
+      Fluttertoast.showToast(msg: "Left Session");
+      Navigator.pop(context);
     });
   }
 
@@ -210,6 +233,7 @@ class GameSessionState extends State<GameSession> {
   @override
   Widget build(BuildContext context) {
     Widget floatingWindow;
+    Widget deleteSessionButton;
     if (currentUserId != hostID) {
       floatingWindow = FloatingActionButton.extended(
         backgroundColor: Theme.of(context).buttonColor,
@@ -223,9 +247,20 @@ class GameSessionState extends State<GameSession> {
         ),
         onPressed: handleJoinSession,
       );
+      deleteSessionButton = Container();
     } else {
       floatingWindow = Container();
+      deleteSessionButton = FlatButton(
+        child: Icon(
+          Icons.close,
+          color: Colors.black,
+          size: 30.0,
+        ),
+        onPressed: deleteSession,
+      );
     }
+
+
 
     Color tabColor =
         currentUserId == hostID ? ThemeData.light().cardColor : greyColor2;
@@ -310,6 +345,7 @@ class GameSessionState extends State<GameSession> {
                                     ),
                                   ),
                                 ),
+                                deleteSessionButton
                               ],
                             ),
                             onPressed: () {
@@ -326,7 +362,7 @@ class GameSessionState extends State<GameSession> {
                             },
                             color: tabColor,
                             padding:
-                                EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+                                EdgeInsets.fromLTRB(25.0, 10.0, 5.0, 10.0),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10.0)),
                           ),
@@ -381,6 +417,19 @@ class GameSessionState extends State<GameSession> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document, int index) {
+    Widget leaveSessionButton;
+    if(currentUserId == '${document['playerID']}'){
+      leaveSessionButton = FlatButton(
+        child: Icon(
+          Icons.close,
+          color: Colors.black,
+          size: 30.0,
+        ),
+        onPressed: leaveSession,
+      );
+    }else{
+      leaveSessionButton = Container();
+    }
     Color tabColor = currentUserId == '${document['playerID']}'
         ? ThemeData.light().cardColor
         : greyColor2;
@@ -416,6 +465,7 @@ class GameSessionState extends State<GameSession> {
                 ),
               ),
             ),
+            leaveSessionButton
           ],
         ),
         onPressed: () {
@@ -430,7 +480,7 @@ class GameSessionState extends State<GameSession> {
           });
         },
         color: tabColor,
-        padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+        padding: EdgeInsets.fromLTRB(25.0, 10.0, 5.0, 10.0),
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
