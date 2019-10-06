@@ -194,22 +194,23 @@ class GameSessionsState extends State<GameSessions> {
             ],
           ),
           onPressed: () {
-
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => GameSession(
-                          currentUserId: currentUserId,
-                          gameId: gameId,
-                          gameName: gameName,
-                          gameSessionName: '${document['sessionName']}',
-                          gameSessionID: document.documentID,
-                          // consider to fact that someone changes username
-                          hostID: '${document['hostID']}',
-                          hostName: '${document['hostName']}',
-                      currentCapacity: document['currentCapacity'],
-                      maxCapacity: document['maxCapacity'],
-                        )));
+                        currentUserId: currentUserId,
+                        gameId: gameId,
+                        gameName: gameName,
+                        gameSessionName: '${document['sessionName']}',
+                        gameSessionID: document.documentID,
+                        // consider to fact that someone changes username
+                        hostID: '${document['hostID']}',
+                        hostName: '${document['hostName']}',
+                        currentCapacity: document['currentCapacity'],
+                        maxCapacity: document['maxCapacity'],
+                        timeStr1: '${document['timeStart']}',
+                        timeStr2: '${document['timeEnd']}',
+                        gameType: '${document['gameType']}')));
           },
           color: greyColor2,
           padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
@@ -264,17 +265,19 @@ class GameSessionsState extends State<GameSessions> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => GameSession(
-                          currentUserId: currentUserId,
-                          gameId: gameId,
-                          gameName: gameName,
-                          gameSessionName: '${document['sessionName']}',
-                          gameSessionID: document.documentID,
-                          // consider to fact that someone changes username
-                          hostID: '${document['hostID']}',
-                          hostName: '${document['hostName']}', currentCapacity: document['currentCapacity'],
-                      maxCapacity: document['maxCapacity'],
-
-                        )));
+                        currentUserId: currentUserId,
+                        gameId: gameId,
+                        gameName: gameName,
+                        gameSessionName: '${document['sessionName']}',
+                        gameSessionID: document.documentID,
+                        // consider to fact that someone changes username
+                        hostID: '${document['hostID']}',
+                        hostName: '${document['hostName']}',
+                        currentCapacity: document['currentCapacity'],
+                        maxCapacity: document['maxCapacity'],
+                        timeStr1: '${document['timeStart']}',
+                        timeStr2: '${document['timeEnd']}',
+                        gameType: '${document['gameType']}')));
           },
           color: greyColor2,
           padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),

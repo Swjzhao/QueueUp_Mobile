@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:queueup_mobileapp/const.dart';
+import 'package:intl/intl.dart';
 
 class GameSession extends StatefulWidget {
   static const String id = "GameSessions";
@@ -16,6 +17,9 @@ class GameSession extends StatefulWidget {
   final String hostName;
   final int currentCapacity;
   final int maxCapacity;
+  final String timeStr1;
+  final String timeStr2;
+  final String gameType;
 
   GameSession(
       {Key key,
@@ -27,7 +31,10 @@ class GameSession extends StatefulWidget {
       @required this.hostID,
       @required this.hostName,
       @required this.currentCapacity,
-      @required this.maxCapacity})
+      @required this.maxCapacity,
+      @required this.timeStr1,
+      @required this.timeStr2,
+      @required this.gameType})
       : super(key: key);
 
   @override
@@ -40,7 +47,10 @@ class GameSession extends StatefulWidget {
       hostID: hostID,
       hostName: hostName,
       currentCapacity: currentCapacity,
-      maxCapacity: maxCapacity);
+      maxCapacity: maxCapacity,
+      timeStr1: timeStr1,
+      timeStr2: timeStr2,
+      gameType: gameType);
 }
 
 class GameSessionState extends State<GameSession> {
@@ -54,7 +64,10 @@ class GameSessionState extends State<GameSession> {
       @required this.hostID,
       @required this.hostName,
       @required this.currentCapacity,
-      @required this.maxCapacity});
+      @required this.maxCapacity,
+      @required this.timeStr1,
+      @required this.timeStr2,
+      @required this.gameType});
 
   bool isLoading = false;
   String currentUserId;
@@ -66,16 +79,39 @@ class GameSessionState extends State<GameSession> {
   String hostName;
   int currentCapacity;
   int maxCapacity;
+  String timeStr1;
+  String timeStr2;
+  String gameType;
 
   String username;
+  TimeOfDay _time;
+  TimeOfDay _time2;
 
   SharedPreferences prefs;
   void readLocal() async {
     prefs = await SharedPreferences.getInstance();
     username = prefs.getString('username') ?? '';
   }
+
+  String timeStart;
+  String timeEnd;
+  final f = new DateFormat('hh:mm');
   void initState() {
     super.initState();
+    List<String> time1s = timeStr1.split(':');
+    List<String> time2s = timeStr2.split(':');
+    _time =
+        new TimeOfDay(hour: int.parse(time1s[0]), minute: int.parse(time1s[1]));
+    _time2 =
+        new TimeOfDay(hour: int.parse(time2s[0]), minute: int.parse(time2s[1]));
+    timeStart =f.format(new DateTime(2019,01, 01, _time.hourOfPeriod,_time.minute)).toString() + " " +
+        (_time.hour.toString() != _time.hourOfPeriod.toString() ? 'PM' : 'AM');
+
+    timeEnd =f.format(new DateTime(2019,01, 01, _time2.hourOfPeriod,_time2.minute)).toString() + " " +
+        (_time2.hour.toString() != _time2.hourOfPeriod.toString()
+            ? 'PM'
+            : 'AM');
+
     readLocal();
   }
 
@@ -96,8 +132,8 @@ class GameSessionState extends State<GameSession> {
         .document(hostID)
         .collection('players')
         .document(DateTime.now().millisecondsSinceEpoch.toString())
-        .setData({'playerID': currentUserId,
-    'playerName':username}).then((data) async {
+        .setData({'playerID': currentUserId, 'playerName': username}).then(
+            (data) async {
       setState(() {
         isLoading = false;
       });
@@ -156,6 +192,36 @@ class GameSessionState extends State<GameSession> {
             : Scaffold(
                 body: Column(
                   children: <Widget>[
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(
+                              bottom: 5.0, left: 15.0, right: 5.0),
+                          child: Text('Lobby'),
+                        )
+                      ],
+                    ),
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(
+                              bottom: 5.0, left: 15.0, right: 5.0),
+                          child: Text(gameType),
+                        )
+                      ],
+                    ),
+                    Row(
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(
+                              bottom: 5.0, left: 15.0, right: 5.0),
+                          child: Text(timeStart + " to " + timeEnd),
+                        )
+                      ],
+                    ),
                     Stack(
                       children: <Widget>[
                         Container(
@@ -230,7 +296,8 @@ class GameSessionState extends State<GameSession> {
                                   );
                                 } else {
                                   return ListView.builder(
-                                    padding: EdgeInsets.only(bottom: 10, top: 10),
+                                    padding:
+                                        EdgeInsets.only(bottom: 10, top: 10),
                                     itemBuilder: (context, index) => buildItem(
                                         context,
                                         snapshot.data.documents[index],
@@ -284,7 +351,6 @@ class GameSessionState extends State<GameSession> {
                 ),
               ),
             ),
-
           ],
         ),
         onPressed: handleJoinSession,

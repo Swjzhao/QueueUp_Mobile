@@ -45,6 +45,10 @@ class CreateSessionState extends State<CreateSession> {
   SharedPreferences prefs;
   final Firestore _firestore = Firestore.instance;
 
+  TimeOfDay _time = new TimeOfDay.now();
+  TimeOfDay _time2 = new TimeOfDay.now();
+
+
 
   @override
   void initState() {
@@ -57,6 +61,27 @@ class CreateSessionState extends State<CreateSession> {
     username = prefs.getString('username') ?? '';
   }
 
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay picked =
+    await showTimePicker(context: context, initialTime: _time);
+    if (picked != null) {
+      setState(() {
+        _time = picked;
+      });
+    }
+  }
+
+  Future<Null> _selectTime2(BuildContext context) async {
+    final TimeOfDay picked =
+    await showTimePicker(context: context, initialTime: _time2);
+    if (picked != null) {
+      setState(() {
+        _time2 = picked;
+      });
+    }
+  }
+
   void handleCreateSession() {
     focusNodeName.unfocus();
     if(sessionName.isEmpty){
@@ -67,6 +92,17 @@ class CreateSessionState extends State<CreateSession> {
       isLoading = true;
     });
 
+    String timeStart = _time.hour.toString() +
+        ":" +
+        _time.minute.toString() +
+        ":" +
+        _time.hourOfPeriod.toString();
+    String timeEnd = _time2.hour.toString() +
+        ":" +
+        _time2.minute.toString() +
+        ":" +
+        _time2.hourOfPeriod.toString();
+
     Firestore.instance.collection('gameSessions').document(gameId).collection('sessions').document(currentUserId).setData({
       'currentCapacity': 1,
       'hostID': currentUserId,
@@ -74,7 +110,9 @@ class CreateSessionState extends State<CreateSession> {
       'sessionName': sessionName,
       'gameType':casual,
       'hostName': username,
-
+      'timeStart': timeStart,
+      'timeEnd': timeEnd,
+      'timeZone': DateTime.now().timeZoneName
     }).then((data) async {
 
       setState(() {
@@ -187,6 +225,30 @@ class CreateSessionState extends State<CreateSession> {
                     ),
                   ],
                 ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                  Text(
+                    "From ",
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  FlatButton(
+                      child: Text(_time.format(context),
+                          style: TextStyle(fontSize: 20.0)),
+                      onPressed: () {
+                        _selectTime(context);
+                      }),
+                ]),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                  Text(
+                    "To ",
+                    style: TextStyle(fontSize: 20.0),
+                  ),
+                  FlatButton(
+                      child: Text(_time2.format(context),
+                          style: TextStyle(fontSize: 20.0)),
+                      onPressed: () {
+                        _selectTime2(context);
+                      }),
+                ]),
                 Container(
                   child: FlatButton(
                     onPressed: handleCreateSession,
