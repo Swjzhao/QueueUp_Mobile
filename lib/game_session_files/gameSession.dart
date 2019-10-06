@@ -67,6 +67,18 @@ class GameSessionState extends State<GameSession> {
   int currentCapacity;
   int maxCapacity;
 
+  String username;
+
+  SharedPreferences prefs;
+  void readLocal() async {
+    prefs = await SharedPreferences.getInstance();
+    username = prefs.getString('username') ?? '';
+  }
+  void initState() {
+    super.initState();
+    readLocal();
+  }
+
   void handleJoinSession() {
     print(currentCapacity.toString() + ' ' + maxCapacity.toString());
     if (currentCapacity == maxCapacity) {
@@ -84,7 +96,8 @@ class GameSessionState extends State<GameSession> {
         .document(hostID)
         .collection('players')
         .document(DateTime.now().millisecondsSinceEpoch.toString())
-        .setData({'playerID': currentUserId}).then((data) async {
+        .setData({'playerID': currentUserId,
+    'playerName':username}).then((data) async {
       setState(() {
         isLoading = false;
       });
@@ -253,7 +266,7 @@ class GameSessionState extends State<GameSession> {
                   children: <Widget>[
                     Container(
                       child: Text(
-                        '${document['playerID']}',
+                        '${document['playerName']}',
                         style: TextStyle(color: primaryColor),
                       ),
                       alignment: Alignment.centerLeft,

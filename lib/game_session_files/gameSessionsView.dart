@@ -4,6 +4,8 @@ import 'package:queueup_mobileapp/const.dart';
 import 'package:queueup_mobileapp/game_session_files/createSession.dart';
 import 'package:queueup_mobileapp/game_session_files/gameSession.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class GameSessions extends StatefulWidget {
   static const String id = "GameSessions";
 
