@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:queueup_mobileapp/const.dart';
 import 'package:intl/intl.dart';
+import 'package:queueup_mobileapp/explore_files/detail.dart';
 
 class GameSession extends StatefulWidget {
   static const String id = "GameSessions";
@@ -104,15 +105,35 @@ class GameSessionState extends State<GameSession> {
         new TimeOfDay(hour: int.parse(time1s[0]), minute: int.parse(time1s[1]));
     _time2 =
         new TimeOfDay(hour: int.parse(time2s[0]), minute: int.parse(time2s[1]));
-    timeStart =f.format(new DateTime(2019,01, 01, _time.hourOfPeriod,_time.minute)).toString() + " " +
+    timeStart = f
+            .format(
+                new DateTime(2019, 01, 01, _time.hourOfPeriod, _time.minute))
+            .toString() +
+        " " +
         (_time.hour.toString() != _time.hourOfPeriod.toString() ? 'PM' : 'AM');
 
-    timeEnd =f.format(new DateTime(2019,01, 01, _time2.hourOfPeriod,_time2.minute)).toString() + " " +
+    timeEnd = f
+            .format(
+                new DateTime(2019, 01, 01, _time2.hourOfPeriod, _time2.minute))
+            .toString() +
+        " " +
         (_time2.hour.toString() != _time2.hourOfPeriod.toString()
             ? 'PM'
             : 'AM');
 
     readLocal();
+  }
+
+  void clickUser(String playerID) {
+    Firestore.instance
+        .collection('users')
+        .document(playerID)
+        .get()
+        .then((DocumentSnapshot ds) {
+      Navigator.of(context).push(new PageRouteBuilder(
+        pageBuilder: (_, __, ___) => new DetailPage(snapshot: ds),
+      ));
+    });
   }
 
   void handleJoinSession() {
@@ -179,7 +200,8 @@ class GameSessionState extends State<GameSession> {
       floatingWindow = Container();
     }
 
-    Color tabColor = currentUserId == hostID? ThemeData.light().cardColor:greyColor2;
+    Color tabColor =
+        currentUserId == hostID ? ThemeData.light().cardColor : greyColor2;
     return new Scaffold(
         appBar: new AppBar(
           title: new Text(
@@ -263,7 +285,18 @@ class GameSessionState extends State<GameSession> {
                                 ),
                               ],
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              Firestore.instance
+                                  .collection('users')
+                                  .document(hostID)
+                                  .get()
+                                  .then((DocumentSnapshot ds) {
+                                Navigator.of(context).push(new PageRouteBuilder(
+                                  pageBuilder: (_, __, ___) =>
+                                      new DetailPage(snapshot: ds),
+                                ));
+                              });
+                            },
                             color: tabColor,
                             padding:
                                 EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
@@ -320,7 +353,9 @@ class GameSessionState extends State<GameSession> {
   }
 
   Widget buildItem(BuildContext context, DocumentSnapshot document, int index) {
-    Color tabColor = currentUserId == '${document['playerID']}'? ThemeData.light().cardColor:greyColor2;
+    Color tabColor = currentUserId == '${document['playerID']}'
+        ? ThemeData.light().cardColor
+        : greyColor2;
     return Container(
       child: FlatButton(
         child: Row(
@@ -355,7 +390,17 @@ class GameSessionState extends State<GameSession> {
             ),
           ],
         ),
-        onPressed: handleJoinSession,
+        onPressed: () {
+          Firestore.instance
+              .collection('users')
+              .document('${document['playerID']}')
+              .get()
+              .then((DocumentSnapshot ds) {
+            Navigator.of(context).push(new PageRouteBuilder(
+              pageBuilder: (_, __, ___) => new DetailPage(snapshot: ds),
+            ));
+          });
+        },
         color: tabColor,
         padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
         shape:
